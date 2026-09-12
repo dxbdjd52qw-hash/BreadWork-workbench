@@ -2,6 +2,8 @@
 
 一个面向考研备考的个人工作台：课表、单词打卡、每日待办、考研进度、错题复习、复盘笔记、DDL 倒计时、数据总览、AI 学习助手，共 9+1 个模块。
 
+**PWA 应用**：支持「添加到主屏幕 / 安装应用」，手机（iOS/Android）和电脑（Chrome/Edge）都能像原生 App 一样从桌面图标打开。
+
 **云端架构**：FastAPI 后端跑在阿里云 ECS（systemd 常驻），前端由后端静态托管，手机/电脑浏览器直接访问即可使用；AI 对话走 DeepSeek（SSE 流式）；多设备数据双向同步（10s 轮询 + 改动防抖推送，`updatedAt` 新者胜 + 墓碑软删）。
 
 ## 目录结构
@@ -33,6 +35,16 @@ sudo systemctl enable --now ytwb-api
 ## 前端配置
 
 前端与后端同源部署时**开箱即用**（自动识别 `location.origin`）；单独打开 `frontend/index.html` 则为本地模式。云端模式只需在页面 AI 抽屉「配置接口」填入你 `.env` 里的 `API_KEY`。
+
+## 安装为应用（PWA）
+
+服务通过 **HTTPS**（或 localhost）访问时即可安装：
+
+- **Android / 手机 Chrome**：浏览器菜单 →「添加到主屏幕」/「安装应用」
+- **iOS / Safari**：分享按钮 →「添加到主屏幕」
+- **电脑 Chrome / Edge**：地址栏右侧「安装」图标
+
+> 注意：HTTP（非 localhost）下浏览器不触发安装，接入域名 + SSL 后即可（见部署章节）。
 
 ## License
 

@@ -4,6 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>麺包的工作台</title>
+<meta name="theme-color" content="#1d1d1f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="研途工作台">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 <style>
 :root{
@@ -1565,5 +1573,6 @@ setInterval(()=>{ renderTopbar(); if(curModule==='courses') renderCourses(); }, 
 setInterval(()=>{ if(API_CONFIG.mode==='custom') API.data.sync(); }, 10000);
 document.addEventListener('visibilitychange', ()=>{ if(!document.hidden && API_CONFIG.mode==='custom') API.data.sync(); });
 </script>
+<script>if('serviceWorker' in navigator && location.protocol.startsWith('http')){ navigator.serviceWorker.register('sw.js').catch(function(){}); }</script>
 </body>
 </html>

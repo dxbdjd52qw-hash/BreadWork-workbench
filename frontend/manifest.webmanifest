@@ -1,0 +1,17 @@
+{
+  "name": "麺包的工作台",
+  "short_name": "研途工作台",
+  "description": "考研备考个人工作台：课表、单词打卡、待办、进度、错题、复盘、DDL、AI 助手",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "background_color": "#f5f5f7",
+  "theme_color": "#1d1d1f",
+  "lang": "zh-CN",
+  "orientation": "any",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
