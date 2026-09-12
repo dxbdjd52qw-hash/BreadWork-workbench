@@ -1,0 +1,1569 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>麺包的工作台</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<style>
+:root{
+  --bg:#f4f6fb; --card:#ffffff; --ink:#1f2430; --muted:#6b7280; --line:#e6e9f2;
+  --primary:#4f46e5; --primary-soft:#eef0fe; --accent:#14b8a6; --accent-soft:#e6faf6;
+  --danger:#ef4444; --danger-soft:#feecec; --warn:#f59e0b; --warn-soft:#fef4e2;
+  --radius:14px; --shadow:0 2px 10px rgba(31,36,48,.06);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:"PingFang SC","Microsoft YaHei",system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:14px}
+button{font-family:inherit;cursor:pointer;border:none;background:none}
+input,select,textarea{font-family:inherit;font-size:14px}
+::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-thumb{background:#d4d8e4;border-radius:4px}
+
+/* ===== 布局 ===== */
+#app{display:flex;min-height:100vh}
+#sidebar{width:216px;flex-shrink:0;background:var(--card);border-right:1px solid var(--line);position:sticky;top:0;height:100vh;display:flex;flex-direction:column;padding:18px 12px;z-index:20}
+#sidebar .logo{font-size:18px;font-weight:700;color:var(--primary);padding:6px 10px 18px;display:flex;align-items:center;gap:8px}
+#sidebar .nav-btn{display:flex;align-items:center;gap:10px;width:100%;padding:11px 12px;border-radius:10px;color:var(--muted);font-size:14px;margin-bottom:4px;text-align:left;transition:.15s}
+#sidebar .nav-btn:hover{background:var(--bg)}
+#sidebar .nav-btn.active{background:var(--primary-soft);color:var(--primary);font-weight:600}
+#sidebar .nav-btn .ic{width:20px;text-align:center}
+#sidebar .foot{margin-top:auto;font-size:12px;color:#a0a6b8;padding:10px;line-height:1.6}
+#main{flex:1;min-width:0;display:flex;flex-direction:column}
+#topbar{position:sticky;top:0;z-index:15;background:rgba(244,246,251,.9);backdrop-filter:blur(8px);display:flex;align-items:center;gap:14px;padding:14px 24px;border-bottom:1px solid var(--line)}
+#topbar .title{font-size:17px;font-weight:700}
+#topbar .countdown{background:var(--primary-soft);color:var(--primary);font-weight:600;padding:5px 12px;border-radius:999px;font-size:13px;white-space:nowrap}
+#topbar .spacer{flex:1}
+.sync-badge{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);background:var(--card);border:1px solid var(--line);border-radius:999px;padding:5px 12px;white-space:nowrap}
+.sync-badge .dot{width:8px;height:8px;border-radius:50%;background:var(--accent)}
+.sync-badge.syncing .dot{background:var(--warn);animation:blink 1s infinite}
+@keyframes blink{50%{opacity:.3}}
+#aiEntry{background:var(--primary);color:#fff;border-radius:999px;padding:7px 16px;font-size:13px;font-weight:600;white-space:nowrap}
+#view{padding:20px 24px 90px;max-width:1180px;width:100%;margin:0 auto}
+#tabbar{display:none}
+
+/* ===== 通用组件 ===== */
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px}
+.card h3{font-size:15px;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.section-title{font-size:18px;font-weight:700;margin:4px 0 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:6px;background:var(--primary);color:#fff;border-radius:9px;padding:8px 14px;font-size:13px;font-weight:600;transition:.15s}
+.btn:hover{opacity:.9}
+.btn.ghost{background:var(--card);color:var(--ink);border:1px solid var(--line)}
+.btn.soft{background:var(--primary-soft);color:var(--primary)}
+.btn.green{background:var(--accent)}
+.btn.danger-ghost{background:var(--danger-soft);color:var(--danger)}
+.btn.sm{padding:5px 10px;font-size:12px;border-radius:7px}
+.tag{display:inline-block;font-size:11px;padding:2px 8px;border-radius:999px;font-weight:600}
+.tag.p0{background:var(--danger-soft);color:var(--danger)}
+.tag.p1{background:var(--warn-soft);color:#b45309}
+.tag.p2{background:#eef2ff;color:#6366f1}
+.tag.cat{background:#f1f3f9;color:var(--muted)}
+.tag.done{background:var(--accent-soft);color:var(--accent)}
+.tag.red{background:var(--danger-soft);color:var(--danger)}
+.tag.orange{background:var(--warn-soft);color:#b45309}
+.tag.gray{background:#f1f3f9;color:#9aa0ae}
+.tag.green{background:var(--accent-soft);color:var(--accent)}
+.muted{color:var(--muted);font-size:12px}
+.row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.grow{flex:1}
+.grid{display:grid;gap:14px}
+.mt{margin-top:14px}
+input.field,select.field,textarea.field{border:1px solid var(--line);border-radius:9px;padding:8px 12px;background:#fbfcfe;outline:none;width:100%}
+input.field:focus,select.field:focus,textarea.field:focus{border-color:var(--primary)}
+.progress-track{height:8px;background:#eef0f6;border-radius:99px;overflow:hidden}
+.progress-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--primary),#818cf8);transition:width .3s}
+.progress-fill.green{background:linear-gradient(90deg,var(--accent),#2dd4bf)}
+
+/* ===== 置顶区 ===== */
+#pinned{padding:16px 24px 0;max-width:1180px;width:100%;margin:0 auto}
+#pinned .pin-head{display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px;margin-bottom:10px}
+#pinned .pin-head .fire{color:var(--danger)}
+.pin-list{display:flex;gap:10px;overflow-x:auto;padding-bottom:6px}
+.pin-item{flex-shrink:0;display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 14px;box-shadow:var(--shadow);font-size:13px}
+.pin-item.overdue{border-color:#f5c2c2;background:#fff7f7}
+.pin-item .b{font-weight:600}
+.pin-empty{background:var(--card);border:1px dashed var(--line);border-radius:12px;padding:14px;color:var(--muted);font-size:13px;width:100%;text-align:center}
+
+/* ===== 主页 ===== */
+.home-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+.home-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;cursor:pointer;transition:.18s;display:flex;flex-direction:column;gap:8px;min-height:150px}
+.home-card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(31,36,48,.12);border-color:#c9cfec}
+.home-card .hc-head{display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px}
+.home-card .hc-head .arrow{margin-left:auto;color:#c3c9dc;font-size:16px}
+.home-card .hc-big{font-size:24px;font-weight:800}
+.home-card .hc-sub{font-size:12px;color:var(--muted);line-height:1.7}
+.advice-item{display:flex;align-items:flex-start;gap:10px;padding:9px 4px;border-bottom:1px solid var(--line);font-size:13px;line-height:1.7;cursor:pointer}
+.advice-item:last-child{border-bottom:none}
+.advice-item:hover .adv-text{color:var(--primary)}
+
+/* ===== 待办 ===== */
+.todo-item{display:flex;align-items:center;gap:12px;padding:12px 4px;border-bottom:1px solid var(--line)}
+.todo-item:last-child{border-bottom:none}
+.todo-check{width:20px;height:20px;border-radius:6px;border:2px solid #c9cede;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;transition:.15s}
+.todo-check.on{background:var(--accent);border-color:var(--accent)}
+.todo-item.done .t-name{text-decoration:line-through;color:#9aa0ae}
+.todo-item.overdue{background:linear-gradient(90deg,#fff7f7,transparent);border-radius:8px}
+.filter-tabs{display:flex;gap:6px;background:#eef0f6;border-radius:10px;padding:4px}
+.filter-tabs button{padding:6px 14px;border-radius:8px;font-size:13px;color:var(--muted)}
+.filter-tabs button.active{background:#fff;color:var(--primary);font-weight:600;box-shadow:var(--shadow)}
+.quick-add{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.quick-add input{flex:1;min-width:180px}
+.quick-add select{width:auto}
+
+/* ===== 课表 ===== */
+.course-grid-wrap{overflow-x:auto}
+table.course-grid{border-collapse:collapse;width:100%;min-width:760px}
+table.course-grid th,table.course-grid td{border:1px solid var(--line);padding:6px;font-size:12px;text-align:center;vertical-align:middle}
+table.course-grid th{background:#f8f9fd;color:var(--muted);font-weight:600;padding:8px 6px}
+table.course-grid td.sec-cell{background:#f8f9fd;color:var(--muted);width:86px;font-size:11px;line-height:1.5}
+.course-cell{border-radius:8px;padding:6px 4px!important;font-weight:600;line-height:1.4;min-width:90px}
+.course-cell small{display:block;font-weight:400;font-size:11px;opacity:.85}
+.course-cell.now{outline:2px solid var(--primary);outline-offset:-2px;box-shadow:0 0 0 3px rgba(79,70,229,.15)}
+.today-course-list{display:none}
+
+/* ===== 单词 ===== */
+.stat-ring-wrap{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.heat{display:grid;grid-auto-flow:column;grid-template-rows:repeat(7,11px);gap:3px}
+.heat .cell{width:11px;height:11px;border-radius:3px;background:#ebedf2}
+.word-book-card{border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:.15s}
+.word-book-card:hover{border-color:var(--primary)}
+.word-book-card.active{border-color:var(--primary);background:var(--primary-soft)}
+.word-item{display:flex;align-items:center;gap:10px;padding:9px 4px;border-bottom:1px solid var(--line);font-size:13px}
+.word-item .w{font-weight:700;width:130px}
+.word-item .ph{color:var(--muted);width:130px;font-size:12px}
+.flash-card{background:linear-gradient(135deg,#4f46e5,#7c6cf0);color:#fff;border-radius:16px;padding:36px 24px;text-align:center;min-height:190px;display:flex;flex-direction:column;justify-content:center;gap:10px;cursor:pointer;user-select:none}
+.flash-card .fw{font-size:30px;font-weight:700;letter-spacing:1px}
+.flash-card .fp{opacity:.85}
+.flash-card .fm{border-top:1px solid rgba(255,255,255,.3);padding-top:12px;font-size:15px;line-height:1.7}
+
+/* ===== 进度 ===== */
+.subj-tabs{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.subj-tabs button{padding:8px 18px;border-radius:999px;background:#eef0f6;color:var(--muted);font-size:13px;font-weight:600}
+.subj-tabs button.active{background:var(--primary);color:#fff}
+.prog-item{padding:13px 4px;border-bottom:1px solid var(--line)}
+.prog-item:last-child{border-bottom:none}
+
+/* ===== 错题 ===== */
+.mis-item{display:flex;gap:12px;padding:13px 4px;border-bottom:1px solid var(--line)}
+.mis-item:last-child{border-bottom:none}
+.mis-thumb{width:64px;height:64px;border-radius:10px;object-fit:cover;flex-shrink:0;border:1px solid var(--line);cursor:pointer}
+.mis-noimg{width:64px;height:64px;border-radius:10px;background:#f1f3f9;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.mis-review-card{background:linear-gradient(135deg,#b91c1c,#ef4444);color:#fff;border-radius:16px;padding:28px 22px;min-height:220px;display:flex;flex-direction:column;gap:12px;user-select:none}
+.mis-review-card .mq{font-size:15px;line-height:1.9;white-space:pre-wrap}
+.mis-review-card .ma{border-top:1px solid rgba(255,255,255,.35);padding-top:12px;font-size:14px;line-height:1.9;white-space:pre-wrap}
+.mis-review-card img{max-width:100%;border-radius:10px}
+.img-preview-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.img-preview-row .pwrap{position:relative}
+.img-preview-row img{width:72px;height:72px;object-fit:cover;border-radius:8px;border:1px solid var(--line)}
+.img-preview-row .pdel{position:absolute;top:-7px;right:-7px;width:20px;height:20px;border-radius:50%;background:var(--danger);color:#fff;font-size:11px;display:flex;align-items:center;justify-content:center}
+.ai-analysis{background:var(--primary-soft);border-radius:10px;padding:10px 12px;font-size:12px;line-height:1.8;margin-top:8px;white-space:pre-wrap}
+
+/* ===== 复盘 ===== */
+.note-item{padding:14px 4px;border-bottom:1px solid var(--line);cursor:pointer}
+.note-item:hover .n-title{color:var(--primary)}
+
+/* ===== 数据总览 ===== */
+.stat-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
+.stat-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow)}
+.stat-card .sv{font-size:26px;font-weight:800;margin:4px 0}
+.chart-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px;margin-top:14px}
+
+/* ===== DDL ===== */
+.ddl-item{display:flex;align-items:center;gap:12px;padding:13px 4px;border-bottom:1px solid var(--line)}
+.ddl-item:last-child{border-bottom:none}
+.ddl-days{font-size:20px;font-weight:800;width:64px;text-align:center;flex-shrink:0}
+.ddl-acts{display:flex;align-items:center;gap:12px;flex-shrink:0}
+.cal{border-collapse:collapse;width:100%}
+.cal th,.cal td{border:1px solid var(--line);width:14.28%;vertical-align:top;padding:4px;font-size:12px}
+.cal th{background:#f8f9fd;color:var(--muted);text-align:center;padding:8px 4px}
+.cal td{height:76px}
+.cal .d{color:var(--muted);font-size:11px}
+.cal .ev{display:block;border-radius:5px;padding:2px 5px;font-size:11px;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
+.cal .today-cell{background:var(--primary-soft)}
+
+/* ===== AI 抽屉 ===== */
+#aiFab{position:fixed;right:22px;bottom:24px;width:54px;height:54px;border-radius:50%;background:linear-gradient(135deg,var(--primary),#7c6cf0);color:#fff;font-size:24px;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 20px rgba(79,70,229,.4);z-index:40;transition:.2s}
+#aiFab:hover{transform:scale(1.08)}
+#aiDrawer{position:fixed;top:0;right:0;height:100vh;width:420px;max-width:100vw;background:var(--card);box-shadow:-8px 0 30px rgba(0,0,0,.12);z-index:50;display:flex;flex-direction:column;transform:translateX(105%);transition:transform .28s ease}
+#aiDrawer.open{transform:translateX(0)}
+#aiDrawer .ai-head{padding:14px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px}
+#aiDrawer .ai-head .t{font-weight:700;font-size:15px}
+.ai-guide{margin:12px 14px 0;background:var(--warn-soft);border:1px solid #f5dfa8;border-radius:12px;padding:12px 14px;font-size:12px;line-height:1.8;color:#7c5a10}
+.ai-guide code{background:#fff;padding:1px 5px;border-radius:4px}
+.ai-sessions{padding:8px 14px;display:flex;gap:6px;overflow-x:auto;border-bottom:1px solid var(--line)}
+.ai-sessions .sess{flex-shrink:0;font-size:12px;padding:5px 10px;border-radius:999px;background:#eef0f6;color:var(--muted);max-width:130px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ai-sessions .sess.active{background:var(--primary);color:#fff}
+#aiMsgs{flex:1;overflow-y:auto;padding:16px 14px;display:flex;flex-direction:column;gap:12px}
+.msg{max-width:86%;padding:10px 13px;border-radius:14px;font-size:13px;line-height:1.7;white-space:pre-wrap;word-break:break-word}
+.msg.user{align-self:flex-end;background:var(--primary);color:#fff;border-bottom-right-radius:4px}
+.msg.bot{align-self:flex-start;background:#f1f3f9;border-bottom-left-radius:4px}
+.msg.bot.local-tag::after{content:"· 本地计算";display:block;font-size:10px;color:#9aa0ae;margin-top:5px}
+.quick-cmds{display:flex;gap:6px;padding:8px 14px;overflow-x:auto}
+.quick-cmds button{flex-shrink:0;font-size:12px;background:var(--accent-soft);color:#0f766e;border-radius:999px;padding:6px 12px}
+.ai-input{display:flex;gap:8px;padding:12px 14px;border-top:1px solid var(--line)}
+.ai-input input{flex:1}
+
+/* ===== 弹窗 ===== */
+#modalRoot .mask{position:fixed;inset:0;background:rgba(20,24,40,.45);z-index:60;display:flex;align-items:center;justify-content:center;padding:18px}
+.modal{background:var(--card);border-radius:16px;padding:22px;width:560px;max-width:100%;max-height:88vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.modal h3{margin-bottom:14px}
+.modal .frow{margin-bottom:12px}
+.modal .frow label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px}
+.modal .fbtns{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}
+
+/* ===== 移动端 ===== */
+@media (max-width:820px){
+  #sidebar{display:none}
+  #view{padding:14px 14px 110px}
+  #pinned{padding:12px 14px 0}
+  #topbar{padding:12px 14px;gap:8px;flex-wrap:wrap}
+  #topbar .title{font-size:15px}
+  #tabbar{display:flex;position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--line);z-index:30;overflow-x:auto;padding:6px 4px}
+  #tabbar button{flex:1;min-width:64px;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;color:var(--muted);padding:6px 2px;border-radius:10px}
+  #tabbar button.active{color:var(--primary);font-weight:600}
+  #tabbar button .ic{font-size:18px}
+  #aiFab{bottom:76px}
+  #aiDrawer{width:100vw}
+  .course-grid-wrap{display:none}
+  .today-course-list{display:block}
+  .chart-grid{grid-template-columns:1fr}
+  /* DDL 列表移动端重排：第一行 天数+名称，第二行 标签+按钮 */
+  .ddl-item{flex-wrap:wrap;gap:10px}
+  .ddl-days{width:auto;min-width:56px;font-size:18px;text-align:left}
+  .ddl-item>.grow{flex:1;min-width:0;word-break:break-word}
+  .ddl-acts{width:100%;justify-content:flex-end;flex-wrap:wrap;gap:6px}
+  .ddl-acts .btn{padding:5px 10px;font-size:12px}
+  .todo-item{flex-wrap:wrap}
+  .todo-item>.grow{flex:1;min-width:0;word-break:break-word}
+  #tabbar button{min-width:56px;white-space:nowrap}
+}
+/* ===== 黑白灰 iOS 主题覆盖（v0.2） ===== */
+:root{
+  --bg:#f5f5f7; --card:rgba(255,255,255,.72); --ink:#1d1d1f; --muted:#86868b; --line:rgba(0,0,0,.08);
+  --primary:#1d1d1f; --primary-soft:rgba(0,0,0,.05);
+  --accent:#48484a; --accent-soft:rgba(0,0,0,.06);
+  --danger:#1d1d1f; --danger-soft:rgba(0,0,0,.07);
+  --warn:#636366; --warn-soft:rgba(0,0,0,.05);
+  --radius:18px; --shadow:0 4px 24px rgba(0,0,0,.05);
+  --vivid:#0a84ff; --vivid2:#5e5ce6; --ok:#30d158;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC","Microsoft YaHei",system-ui,sans-serif;-webkit-font-smoothing:antialiased;letter-spacing:.01em}
+#particles{position:fixed;inset:0;z-index:0;pointer-events:none}
+#app{position:relative;z-index:1}
+#sidebar{background:rgba(255,255,255,.6);backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);border-right:1px solid var(--line)}
+#sidebar .logo{color:var(--ink);letter-spacing:.02em}
+#sidebar .nav-btn{border-radius:12px;transition:all .2s cubic-bezier(.28,.11,.32,1)}
+#sidebar .nav-btn.active{background:#1d1d1f;color:#fff}
+#topbar{background:rgba(245,245,247,.75);backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);border-bottom:1px solid var(--line)}
+#topbar .countdown{background:#1d1d1f;color:#fff}
+#aiEntry{background:#1d1d1f;transition:all .2s}
+#aiEntry:hover{transform:scale(1.04)}
+.sync-badge{background:rgba(255,255,255,.7);backdrop-filter:blur(12px)}
+.card,.home-card,.stat-card,.pin-item{background:rgba(255,255,255,.72);backdrop-filter:blur(20px) saturate(160%);-webkit-backdrop-filter:blur(20px) saturate(160%);border:1px solid rgba(255,255,255,.65);box-shadow:0 4px 24px rgba(0,0,0,.05),inset 0 1px 0 rgba(255,255,255,.6)}
+.btn{background:#1d1d1f;border-radius:12px;transition:all .2s cubic-bezier(.28,.11,.32,1)}
+.btn:hover{opacity:.85;transform:translateY(-1px)}
+.btn.ghost{background:rgba(255,255,255,.7);color:var(--ink);border:1px solid var(--line)}
+.btn.soft{background:rgba(10,132,255,.12);color:#0a84ff;font-weight:600}
+.btn.green{background:linear-gradient(135deg,#30d158,#28b84c);color:#fff;box-shadow:0 2px 10px rgba(48,209,88,.3)}
+.btn.danger-ghost{background:rgba(255,69,58,.12);color:#d70015;font-weight:600}
+.tag.p0{background:rgba(255,69,58,.12);color:#d70015;font-weight:700}
+.tag.p1{background:rgba(10,132,255,.12);color:#0a84ff;font-weight:700}
+.tag.p2{background:rgba(0,0,0,.06);color:#86868b}
+.tag.cat{background:rgba(0,0,0,.05);color:var(--muted)}
+.tag.gray{background:rgba(0,0,0,.06);color:#86868b}
+.tag.green,.tag.done{background:rgba(52,199,89,.15);color:#1e9e4a;font-weight:700}
+.tag.red{background:rgba(255,69,58,.12);color:#d70015;font-weight:700}
+.tag.orange{background:rgba(255,159,10,.17);color:#c93400;font-weight:700}
+.tag.blue{background:rgba(10,132,255,.12);color:#0a84ff;font-weight:700}
+.filter-tabs{background:rgba(0,0,0,.05);border-radius:12px}
+.filter-tabs button{border-radius:10px;transition:all .2s}
+.filter-tabs button.active{background:#fff;color:var(--ink);box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.subj-tabs button{background:rgba(0,0,0,.05);transition:all .2s}
+.subj-tabs button.active{background:#1d1d1f;color:#fff}
+.progress-track{background:rgba(10,132,255,.12)}
+.progress-fill{background:linear-gradient(90deg,var(--vivid),var(--vivid2));box-shadow:0 0 8px rgba(10,132,255,.35)}
+.progress-fill.green{background:linear-gradient(90deg,var(--ok),#5eead4);box-shadow:0 0 8px rgba(48,209,88,.35)}
+.todo-check{border-color:#c7c7cc;border-radius:7px}
+.todo-check.on{background:#1d1d1f;border-color:#1d1d1f}
+.todo-item.overdue{background:linear-gradient(90deg,rgba(0,0,0,.05),transparent)}
+.pin-item.overdue{border-color:rgba(0,0,0,.25);background:rgba(0,0,0,.05)}
+.pin-empty{background:rgba(255,255,255,.6);backdrop-filter:blur(12px)}
+input.field,select.field,textarea.field{background:rgba(255,255,255,.8);border-radius:12px;transition:border .2s,box-shadow .2s}
+input.field:focus,select.field:focus,textarea.field:focus{border-color:#1d1d1f;box-shadow:0 0 0 3px rgba(29,29,31,.08)}
+.flash-card{background:linear-gradient(135deg,#1d1d1f,#48484a);border-radius:20px}
+.mis-review-card{background:linear-gradient(135deg,#1d1d1f,#4a4a4c);border-radius:20px}
+.word-book-card{background:rgba(255,255,255,.6)}
+.word-book-card.active{border-color:#1d1d1f;background:rgba(0,0,0,.05)}
+.course-cell.now{outline:2px solid #1d1d1f;box-shadow:0 0 0 4px rgba(29,29,31,.12)}
+#aiFab{background:rgba(29,29,31,.88);backdrop-filter:blur(10px);box-shadow:0 8px 28px rgba(0,0,0,.28);transition:all .25s cubic-bezier(.28,.11,.32,1)}
+#aiFab:hover{transform:scale(1.1) rotate(6deg)}
+#aiDrawer{background:rgba(255,255,255,.82);backdrop-filter:blur(28px) saturate(180%);-webkit-backdrop-filter:blur(28px) saturate(180%);box-shadow:-12px 0 40px rgba(0,0,0,.14)}
+.msg.user{background:#1d1d1f}
+.msg.bot{background:rgba(0,0,0,.05)}
+.ai-guide{background:rgba(0,0,0,.05);border:1px solid rgba(0,0,0,.1);color:var(--ink)}
+.ai-guide code{background:rgba(255,255,255,.8)}
+.quick-cmds button{background:rgba(0,0,0,.06);color:var(--ink)}
+#modalRoot .mask{background:rgba(245,245,247,.55);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.modal{background:rgba(255,255,255,.92);backdrop-filter:blur(28px) saturate(180%);border-radius:22px;border:1px solid rgba(255,255,255,.7);box-shadow:0 24px 70px rgba(0,0,0,.22)}
+#tabbar{background:rgba(255,255,255,.8);backdrop-filter:blur(24px) saturate(180%)}
+#tabbar button.active{color:var(--ink)}
+.home-card:hover{border-color:rgba(0,0,0,.18)}
+.ai-analysis{background:rgba(0,0,0,.05)}
+.cal .today-cell{background:rgba(0,0,0,.05)}
+table.course-grid th,table.course-grid td.sec-cell,.cal th{background:rgba(0,0,0,.03)}
+.heat .cell{background:#e8e8ed}
+.mis-noimg{background:rgba(0,0,0,.05);color:#86868b}
+.advice-item:hover .adv-text{color:var(--ink)}
+.note-item:hover .n-title{color:var(--ink)}
+.section-title i,.card h3 i{opacity:.85}
+</style>
+</head>
+<body>
+<canvas id="particles"></canvas>
+<div id="app">
+  <aside id="sidebar">
+    <div class="logo"><i class="fa-solid fa-bread-slice"></i> 麺包的工作台</div>
+    <div id="navList"></div>
+    <div class="foot">数据存储：本地（资料库模式抽象层）<br>切换阿里云仅改 API_CONFIG.baseUrl</div>
+  </aside>
+  <div id="main">
+    <header id="topbar">
+      <div class="title">麺包的工作台</div>
+      <div class="countdown" id="countdown" style="cursor:pointer" title="点击设置初试日期" onclick="ExamDate.edit()"></div>
+      <div class="spacer"></div>
+      <div class="sync-badge" id="syncBadge"><span class="dot"></span><span id="syncText">本地模式</span></div>
+      <button id="aiEntry" onclick="AI.open()"><i class="fa-solid fa-wand-magic-sparkles"></i> AI 助手</button>
+    </header>
+    <section id="pinned"></section>
+    <main id="view"></main>
+  </div>
+</div>
+<nav id="tabbar"></nav>
+<button id="aiFab" onclick="AI.open()"><i class="fa-solid fa-wand-magic-sparkles"></i></button>
+<div id="aiDrawer"></div>
+<div id="modalRoot"></div>
+
+<script>
+/* =========================================================
+ * 研途工作台 · 单文件原型 v0.1
+ * 数据层：API.* 抽象（library=本地持久化模拟资料库 / custom=阿里云后端）
+ * 页面内不出现裸 fetch（AI 调用封装在 API.ai 内）
+ * ========================================================= */
+
+/* ---------- 4.1 前端配置层 ---------- */
+const API_CONFIG = {
+  mode: 'library',          // 'library' | 'custom'（在 AI 抽屉「配置接口」填入 Key 后自动切 custom）
+  baseUrl: (location.protocol.startsWith('http') ? location.origin : ''),   // 与后端同源部署时自动生效；file:// 本地打开则为空（本地模式）。也可在页面「配置接口」里填写
+  aiChatPath: '/api/ai/chat',
+  useSSE: true
+};
+/* 本地覆盖配置（AI 引导态里填写，仅存 localStorage，有安全风险已在页面标注） */
+try{ const o = JSON.parse(localStorage.getItem('ytwb_cfg')||'{}'); if(o.baseUrl){API_CONFIG.baseUrl=o.baseUrl;API_CONFIG.mode='custom';} if(o.apiKey) API_CONFIG._key=o.apiKey; }catch(e){}
+if(API_CONFIG.baseUrl && API_CONFIG.mode==='library') API_CONFIG.mode='custom';   // 同源部署开箱即同步，仅需在「配置接口」填 Key
+
+const EXAM_DATE_DEFAULT = '2027-12-25';   // 考研初试默认日期（顶栏倒计时可点击修改，存 meta.examDate）
+function examDate(){ return (typeof Store!=='undefined' && Store.data && Store.data.meta && Store.data.meta.examDate) || EXAM_DATE_DEFAULT; }
+const SEM_START   = '2026-09-07';   // 开学第一周周一（待确认清单 #6 默认值）
+const SECTION_TIMES = ['08:00-08:45','08:55-09:40','10:00-10:45','10:55-11:40','14:00-14:45','14:55-15:40','16:00-16:45','16:55-17:40','19:00-19:45','19:55-20:40','20:50-21:35','21:45-22:30'];
+
+/* ---------- 工具 ---------- */
+const $  = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const esc = s => String(s??'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+const p2 = n => String(n).padStart(2,'0');
+function dstr(d){ return d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate()); }
+function todayStr(){ return dstr(new Date()); }
+function addDays(ds,n){ const d=new Date(ds+'T00:00:00'); d.setDate(d.getDate()+n); return dstr(d); }
+function dayDiff(a,b){ return Math.round((new Date(a+'T00:00:00')-new Date(b+'T00:00:00'))/86400000); }
+function weekNum(ds){ return Math.max(1, Math.floor(dayDiff(ds,SEM_START)/7)+1); }
+function dow(ds){ const g=new Date(ds+'T00:00:00').getDay(); return g===0?7:g; } // 1=周一
+function inThisWeek(ds){ const t=todayStr(), m=addDays(t,-(dow(t)-1)), s=addDays(m,6); return ds>=m&&ds<=s; }
+function weekRange(){ const t=todayStr(), m=addDays(t,-(dow(t)-1)); return [m, addDays(m,6)]; }
+const DOW_NAME = ['','周一','周二','周三','周四','周五','周六','周日'];
+
+/* ---------- 存储层（library 模式的本地实现） ---------- */
+const Store = {
+  key:'ytwb_v1', data:null,
+  load(){
+    try{ this.data = JSON.parse(localStorage.getItem(this.key)); }catch(e){ this.data=null; }
+    if(!this.data || !this.data.meta){ this.data = seedData(); this.save(); }
+    if(!this.data.mistakes){ this.data.mistakes = []; this.save(); } // 旧数据迁移
+  },
+  save(){ this.data.meta.updatedAt = new Date().toISOString(); localStorage.setItem(this.key, JSON.stringify(this.data));
+    clearTimeout(Store._t); Store._t=setTimeout(()=>{ if(typeof API!=='undefined') API.data.sync(); }, 800); },
+  coll(n){ return (this.data[n]||[]).filter(x=>x&&!x.deleted); },
+  add(c,item){ item.id=item.id||uid(); item.updatedAt=new Date().toISOString(); this.data[c].push(item); this.save(); return item; },
+  update(c,id,patch){ const it=this.data[c].find(x=>x.id===id); if(it){Object.assign(it,patch,{updatedAt:new Date().toISOString()}); this.save();} return it; },
+  remove(c,id){ const it=this.data[c].find(x=>x.id===id); if(it){ it.deleted=true; it.updatedAt=new Date().toISOString(); this.save(); } }
+};
+
+function seedData(){
+  const t = todayStr();
+  const todos = [
+    {id:uid(),name:'整理线代错题本',priority:'P0',cat:'学习',due:addDays(t,-1),done:false,note:'矩阵部分',createdAt:t},
+    {id:uid(),name:'高数第三章习题 1-20',priority:'P0',cat:'学习',due:t,done:false,note:'',createdAt:t},
+    {id:uid(),name:'背单词 100 个',priority:'P1',cat:'学习',due:t,done:false,note:'',createdAt:t},
+    {id:uid(),name:'晨跑 3 公里',priority:'P2',cat:'生活',due:t,done:true,doneAt:t+'T07:10:00',note:'',createdAt:t},
+    {id:uid(),name:'社团招新海报定稿',priority:'P2',cat:'社团',due:addDays(t,2),done:false,note:'',createdAt:t},
+  ];
+  /* 历史完成记录：供趋势图展示 */
+  for(let i=1;i<=13;i++){
+    const n=(i*5)%3+1;
+    for(let j=0;j<n;j++) todos.push({id:uid(),name:'历史任务 '+(i+1)+'-'+(j+1),priority:'P1',cat:'学习',due:addDays(t,-i),done:true,doneAt:addDays(t,-i)+'T20:00:00',note:'',createdAt:addDays(t,-i)});
+  }
+  const courses = [
+    {id:uid(),name:'高等数学A',teacher:'王教授',place:'教一 201',dow:1,secStart:1,secEnd:2,weeks:[1,16],parity:0,note:''},
+    {id:uid(),name:'英语精读',teacher:'李老师',place:'外语楼 305',dow:2,secStart:3,secEnd:4,weeks:[1,16],parity:0,note:''},
+    {id:uid(),name:'线性代数',teacher:'陈教授',place:'教二 102',dow:3,secStart:1,secEnd:2,weeks:[1,16],parity:0,note:''},
+    {id:uid(),name:'大学体育',teacher:'赵老师',place:'体育馆',dow:4,secStart:5,secEnd:6,weeks:[1,16],parity:1,note:'单周上课'},
+    {id:uid(),name:'概率论与数理统计',teacher:'刘教授',place:'教一 301',dow:5,secStart:3,secEnd:4,weeks:[1,16],parity:0,note:''},
+  ];
+  const words1 = [
+    ['abandon','/əˈbændən/','v. 放弃；抛弃','He decided to abandon the plan.'],
+    ['ability','/əˈbɪləti/','n. 能力；才能','She has the ability to solve problems.'],
+    ['abnormal','/æbˈnɔːrml/','adj. 反常的；异常的','abnormal weather conditions'],
+    ['abolish','/əˈbɒlɪʃ/','v. 废除；废止','The law was abolished in 1990.'],
+    ['abrupt','/əˈbrʌpt/','adj. 突然的；唐突的','an abrupt change of plan'],
+    ['absorb','/əbˈzɔːb/','v. 吸收；使专心','Plants absorb sunlight.'],
+    ['abstract','/ˈæbstrækt/','adj. 抽象的 n. 摘要','an abstract concept'],
+    ['abundant','/əˈbʌndənt/','adj. 丰富的；充裕的','abundant natural resources'],
+    ['accelerate','/əkˈseləreɪt/','v. 加速；促进','to accelerate economic growth'],
+    ['access','/ˈækses/','n./v. 接近；访问','have access to the Internet'],
+    ['accommodate','/əˈkɒmədeɪt/','v. 容纳；为…提供住宿','The hall can accommodate 500 people.'],
+    ['accomplish','/əˈkʌmplɪʃ/','v. 完成；实现','accomplish a mission'],
+    ['accurate','/ˈækjərət/','adj. 精确的；准确的','an accurate description'],
+    ['accustom','/əˈkʌstəm/','v. 使习惯于','accustom oneself to hard work'],
+    ['acknowledge','/əkˈnɒlɪdʒ/','v. 承认；致谢','He acknowledged his mistake.'],
+    ['acquire','/əˈkwaɪə(r)/','v. 获得；习得','acquire knowledge'],
+    ['adapt','/əˈdæpt/','v. 适应；改编','adapt to the new environment'],
+    ['adequate','/ˈædɪkwət/','adj. 足够的；适当的','adequate preparation'],
+    ['adjacent','/əˈdʒeɪsnt/','adj. 邻近的；毗连的','the building adjacent to the library'],
+    ['advocate','/ˈædvəkeɪt/','v. 提倡；拥护 n. 拥护者','advocate free speech'],
+    ['affection','/əˈfekʃn/','n. 喜爱；感情','a deep affection for her'],
+    ['agenda','/əˈdʒendə/','n. 议事日程；议程','on the agenda'],
+    ['allocate','/ˈæləkeɪt/','v. 分配；拨给','allocate funds to the project'],
+    ['ambitious','/æmˈbɪʃəs/','adj. 有雄心的；野心勃勃的','an ambitious plan'],
+  ];
+  const wordBooks = [{id:uid(),name:'考研核心词汇',createdAt:t,words:words1.map((w,i)=>({id:uid(),word:w[0],phonetic:w[1],meaning:w[2],example:w[3],unit:i<12?1:2,mastered:0}))}];
+  const wordLogs = [];
+  for(let i=84;i>=1;i--){
+    const r=(i*13)%10;
+    if(r<2) continue; // 随机漏卡
+    const target=100, doneW=[60,80,100,100,90,100,70,100][i%8];
+    wordLogs.push({id:uid(),date:addDays(t,-i),book:'考研核心词汇',target,done:doneW,minutes:20+(i*7)%25,checked:doneW>=60});
+  }
+  const progress = [
+    {id:uid(),subject:'数学',sub:'高数',name:'极限与连续',status:'已掌握',pct:100,plan:addDays(t,-20),note:''},
+    {id:uid(),subject:'数学',sub:'高数',name:'一元函数微分学',status:'进行中',pct:60,plan:addDays(t,10),note:''},
+    {id:uid(),subject:'数学',sub:'线代',name:'矩阵及其运算',status:'进行中',pct:30,plan:addDays(t,-3),note:'特征值部分卡壳'},
+    {id:uid(),subject:'数学',sub:'概率论',name:'随机事件与概率',status:'未开始',pct:0,plan:addDays(t,30),note:''},
+    {id:uid(),subject:'英语',sub:'词汇',name:'核心词汇 5500',status:'进行中',pct:45,plan:addDays(t,40),note:''},
+    {id:uid(),subject:'英语',sub:'阅读',name:'真题阅读 2010-2015',status:'进行中',pct:30,plan:addDays(t,25),note:''},
+    {id:uid(),subject:'英语',sub:'写作',name:'大作文模板',status:'未开始',pct:0,plan:addDays(t,60),note:''},
+    {id:uid(),subject:'英语',sub:'翻译',name:'长难句拆解',status:'未开始',pct:0,plan:addDays(t,55),note:''},
+    {id:uid(),subject:'政治',sub:'马原',name:'唯物论与辩证法',status:'进行中',pct:20,plan:addDays(t,45),note:''},
+    {id:uid(),subject:'政治',sub:'毛中特',name:'新思想概论',status:'未开始',pct:0,plan:addDays(t,70),note:''},
+    {id:uid(),subject:'政治',sub:'史纲',name:'近代史时间线',status:'未开始',pct:0,plan:addDays(t,80),note:''},
+    {id:uid(),subject:'政治',sub:'思修法基',name:'思想道德修养',status:'未开始',pct:0,plan:addDays(t,90),note:''},
+    {id:uid(),subject:'政治',sub:'时政',name:'全年时政汇总',status:'未开始',pct:0,plan:addDays(t,100),note:''},
+  ];
+  const notes = [
+    {id:uid(),date:addDays(t,-1),type:'日复盘',done:'高数习题 20 道、单词 100 个',problem:'线代矩阵秩的概念理解不透',improve:'明天重看教材 3.2 节 + 错题整理',tomorrow:'线代错题本、英语阅读 2 篇',mood:'🙂',createdAt:addDays(t,-1)+'T21:30:00'},
+  ];
+  const ddls = [
+    {id:uid(),name:'考研初试',type:'考试',due:'2027-12-25',done:false,note:'全国硕士研究生招生考试'},
+    {id:uid(),name:'四六级考试',type:'考试',due:'2026-12-19',done:false,note:''},
+    {id:uid(),name:'英语演讲比赛报名截止',type:'报名',due:addDays(t,2),done:false,note:'学院初赛'},
+    {id:uid(),name:'期末周开始',type:'考试',due:'2027-01-05',done:false,note:''},
+  ];
+  const mistakes = [
+    {id:uid(),subject:'数学',title:'极限定义理解偏差',question:'求 lim(x→0) (sin x - x) / x³ 的值。',answer:'用泰勒展开：sin x = x - x³/6 + o(x³)，原式 = -1/6。',images:[],tags:'高数,极限,泰勒展开',status:'复习中',reviewCount:1,lastReview:addDays(t,-2),nextReview:t,note:'之前直接用 sin x ~ x 等价替换，结果为 0，错了——减法式子不能随意等价。',aiAnalysis:'',createdAt:addDays(t,-5)+'T20:00:00'},
+    {id:uid(),subject:'英语',title:'长难句主干找错',question:'The study, published in the journal Nature, suggests that birds living in urban environments have adapted their songs to compete with traffic noise.\n问：主句谓语动词是什么？',answer:'suggests。published... 是过去分词作后置定语，living... 是现在分词作定语修饰 birds，主干为 The study suggests that...。',images:[],tags:'阅读,长难句',status:'未掌握',reviewCount:0,lastReview:'',nextReview:t,note:'把 published 当成谓语了。',aiAnalysis:'',createdAt:addDays(t,-1)+'T21:10:00'},
+  ];
+  return {
+    todos, courses, wordBooks, wordLogs, progress, notes, ddls, mistakes,
+    chatSessions: [],
+    meta: { wordTarget:100, examDate:'2027-12-25', studyMinutes:{'数学':320,'英语':260,'政治':90,'单词':180,'其他':60}, updatedAt:new Date().toISOString() }
+  };
+}
+
+/* ---------- API 抽象层（4.3 / 4.5 契约） ---------- */
+const API = {
+  cfg: API_CONFIG,
+  data: {
+    list(c){ return Store.coll(c); },
+    create(c,item){ return Store.add(c,item); },
+    update(c,id,patch){ return Store.update(c,id,patch); },
+    remove(c,id){ return Store.remove(c,id); },
+    async sync(){
+      if(API_CONFIG.mode==='custom' && API_CONFIG.baseUrl){
+        setSync('syncing');
+        try{
+          const resp = await fetch(API_CONFIG.baseUrl+'/api/data/sync',{
+            method:'POST',
+            headers:{'Content-Type':'application/json', ...(API_CONFIG._key?{Authorization:'Bearer '+API_CONFIG._key}:{})},
+            body:JSON.stringify({collections:Store.data})
+          });
+          if(!resp.ok) throw new Error('sync '+resp.status);
+          const j = await resp.json();
+          /* 增量合并：updatedAt 新者胜，远端新增保留（与后端契约一致） */
+          if(j && j.collections){
+            let changed=false;
+            for(const c of Object.keys(j.collections)){
+              const remote=j.collections[c]; if(!Array.isArray(remote) || !Array.isArray(Store.data[c])) continue;
+              const map={}; Store.data[c].forEach(x=>{ if(x&&x.id) map[x.id]=x; });
+              remote.forEach(x=>{ if(!x||!x.id) return; const l=map[x.id];
+                if(!l || String(x.updatedAt||'')>String(l.updatedAt||'')){ map[x.id]=x; changed=true; } });
+              Store.data[c]=Object.values(map);
+            }
+            /* 直接写 localStorage（不走 Store.save，避免再次触发同步造成循环） */
+            localStorage.setItem(Store.key, JSON.stringify(Store.data));
+            if(changed && typeof renderAll==='function') renderAll();
+          }
+          setSync('ok','已同步'); return;
+        }catch(e){ setSync('offline','离线'); return; }
+      }
+      if(API_CONFIG.mode==='library'){ setSync('','本地模式'); return; }
+    }
+  },
+  ai: {
+    configured(){ return !!API_CONFIG.baseUrl; },
+    async chat({sessionId,messages,context,onToken}){
+      if(!this.configured()){ const e=new Error('AI_NOT_CONFIGURED'); e.code='AI_NOT_CONFIGURED'; throw e; }
+      const resp = await fetch(API_CONFIG.baseUrl+API_CONFIG.aiChatPath,{
+        method:'POST',
+        headers:{'Content-Type':'application/json', ...(API_CONFIG._key?{Authorization:'Bearer '+API_CONFIG._key}:{})},
+        body: JSON.stringify({sessionId,messages,context})
+      });
+      if(!resp.ok || !resp.body) throw new Error('AI 接口异常 '+resp.status);
+      if(API_CONFIG.useSSE){
+        const reader=resp.body.getReader(), dec=new TextDecoder(); let buf='';
+        for(;;){ const {done,value}=await reader.read(); if(done)break; buf+=dec.decode(value,{stream:true});
+          const lines=buf.split('\n'); buf=lines.pop();
+          for(const ln of lines){ if(ln.startsWith('data:')){ const d=ln.slice(5).trim(); if(d==='[DONE]')return; try{const j=JSON.parse(d); const t=j.choices?.[0]?.delta?.content ?? j.text ?? ''; if(t)onToken(t);}catch(e){ if(d)onToken(d);} } }
+        }
+      }else{ const j=await resp.json(); onToken(j.text||j.choices?.[0]?.message?.content||''); }
+    }
+  }
+};
+function setSync(state,text){
+  const b=$('#syncBadge'); b.classList.toggle('syncing',state==='syncing');
+  $('#syncText').textContent = text || (state==='ok'?'已同步':state==='offline'?'离线':'本地模式');
+}
+
+/* ---------- 全局：顶栏 / 导航 / 置顶区 ---------- */
+const MODULES = [
+  {id:'home',    name:'主页',     icon:'<i class="fa-solid fa-house"></i>'},
+  {id:'todos',   name:'今日待办', icon:'<i class="fa-solid fa-list-check"></i>'},
+  {id:'courses', name:'我的课表', icon:'<i class="fa-solid fa-calendar-week"></i>'},
+  {id:'words',   name:'单词打卡', icon:'<i class="fa-solid fa-book-open"></i>'},
+  {id:'progress',name:'考研进度', icon:'<i class="fa-solid fa-chart-line"></i>'},
+  {id:'mistakes',name:'错题复习', icon:'<i class="fa-solid fa-circle-xmark"></i>'},
+  {id:'notes',   name:'复盘笔记', icon:'<i class="fa-solid fa-pen-to-square"></i>'},
+  {id:'dash',    name:'数据总览', icon:'<i class="fa-solid fa-chart-pie"></i>'},
+  {id:'ddls',    name:'DDL 倒计时', icon:'<i class="fa-solid fa-hourglass-half"></i>'},
+];
+let curModule = 'home';
+
+function renderNav(){
+  $('#navList').innerHTML = MODULES.map(m=>`<button class="nav-btn ${curModule===m.id?'active':''}" onclick="go('${m.id}')"><span class="ic">${m.icon}</span>${m.name}</button>`).join('');
+  $('#tabbar').innerHTML = MODULES.map(m=>`<button class="${curModule===m.id?'active':''}" onclick="go('${m.id}')"><span class="ic">${m.icon}</span>${m.name.replace('今日','').replace('我的','').replace('DDL 倒计时','DDL')}</button>`).join('');
+}
+function go(m){ curModule=m; renderNav(); renderAll(); window.scrollTo({top:0}); }
+
+function renderTopbar(){
+  const d = dayDiff(examDate(), todayStr());
+  $('#countdown').innerHTML = `<i class="fa-solid fa-bullseye"></i> 距考研初试 ${d} 天`;
+}
+
+/* 考研初试日期设置（点顶栏倒计时打开，存 meta.examDate，本机生效） */
+const ExamDate = {
+  edit(){
+    openModal(`<h3>设置考研初试日期</h3>
+      <div class="frow"><label>初试日期</label><input class="field" type="date" id="ed-date" value="${examDate()}"></div>
+      <div class="muted" style="font-size:12px;line-height:1.8">保存后顶栏倒计时立即更新；DDL 列表里名为「考研初试」的条目会一并改成新日期。<br>注意：该设置存在本机（meta 不参与云端同步），其他设备上需各设一次。</div>
+      <div class="fbtns"><button class="btn ghost" onclick="closeModal()">取消</button><button class="btn" onclick="ExamDate.save()">保存</button></div>`);
+  },
+  save(){
+    const v = $('#ed-date').value;
+    if(!v) return alert('请选择日期');
+    Store.data.meta.examDate = v;
+    Store.coll('ddls').filter(x=>x.name==='考研初试').forEach(x=> API.data.update('ddls', x.id, {due:v}));
+    Store.save(); closeModal(); renderAll(); toast('初试日期已更新为 '+v);
+  }
+};
+
+/* 2.2 今天要处理 */
+function renderPinned(){
+  const t=todayStr(), items=[];
+  Store.coll('todos').filter(x=>!x.done && x.due<t).forEach(x=> items.push({kind:'overdue',html:`<span class="tag red">逾期</span><span class="b">${esc(x.name)}</span><span class="muted">${x.due}</span><button class="btn sm danger-ghost" onclick="Todo.done('${x.id}')">处理</button>`}));
+  Store.coll('todos').filter(x=>!x.done && x.due===t).forEach(x=> items.push({kind:'today',html:`<span class="tag p1">今日待办</span><span class="b">${esc(x.name)}</span><button class="btn sm soft" onclick="Todo.done('${x.id}')">完成</button>`}));
+  todayCourses().forEach(c=> items.push({kind:'course',html:`<span class="tag cat">课程</span><span class="b">${esc(c.name)}</span><span class="muted">${SECTION_TIMES[c.secStart-1].split('-')[0]} · ${esc(c.place)}</span><button class="btn sm ghost" onclick="go('courses')">课表</button>`}));
+  Store.coll('ddls').filter(x=>!x.done).forEach(x=>{ const r=dayDiff(x.due,t); if(r>=0&&r<=3) items.push({kind:'ddl',html:`<span class="tag red">DDL</span><span class="b">${esc(x.name)}</span><span class="muted" style="color:var(--danger);font-weight:600">剩 ${r} 天</span><button class="btn sm ghost" onclick="go('ddls')">查看</button>`}); });
+  const log=Store.coll('wordLogs').find(x=>x.date===t);
+  if(!log||!log.checked) items.push({kind:'word',html:`<span class="tag orange">未打卡</span><span class="b">今天还没背单词</span><button class="btn sm green" onclick="go('words')">去打卡</button>`});
+  const dm=misDue();
+  if(dm.length) items.push({kind:'mis',html:`<span class="tag orange">错题</span><span class="b">${dm.length} 道待复习</span><button class="btn sm green" onclick="go('mistakes');Mis.tab('review')">去复习</button>`});
+  $('#pinned').innerHTML = `<div class="pin-head"><i class="fa-solid fa-fire"></i>今天要处理 <span class="muted">（昨天没做完的会自动滚到今天）</span></div>` +
+    (items.length? `<div class="pin-list">${items.map(i=>`<div class="pin-item ${i.kind==='overdue'?'overdue':''}">${i.html}</div>`).join('')}</div>`
+                 : `<div class="pin-empty"><i class="fa-solid fa-circle-check"></i> 今日事项全部清空，去「数据总览」看看成果吧</div>`);
+}
+
+/* ---------- 通用小部件 ---------- */
+function ringSVG(pct,size=92,stroke=9,color='var(--vivid)',label){
+  const r=(size-stroke)/2, c=2*Math.PI*r, off=c*(1-Math.min(100,Math.max(0,pct))/100);
+  return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+    <circle cx="${size/2}" cy="${size/2}" r="${r}" stroke="#eef0f6" stroke-width="${stroke}" fill="none"/>
+    <circle cx="${size/2}" cy="${size/2}" r="${r}" stroke="${color}" stroke-width="${stroke}" fill="none" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${off}" transform="rotate(-90 ${size/2} ${size/2})"/>
+    <text x="50%" y="47%" text-anchor="middle" dominant-baseline="middle" font-size="${size*0.2}" font-weight="800" fill="var(--ink)">${Math.round(pct)}%</text>
+    ${label?`<text x="50%" y="66%" text-anchor="middle" font-size="10" fill="var(--muted)">${label}</text>`:''}
+  </svg>`;
+}
+function openModal(html){ $('#modalRoot').innerHTML = `<div class="mask" onclick="if(event.target===this)closeModal()"><div class="modal">${html}</div></div>`; }
+function compressImage(file){ return new Promise(res=>{ const r=new FileReader();
+  r.onload=e=>{ const img=new Image(); img.onload=()=>{ const max=900; let w=img.width,h=img.height; if(w>max){h=Math.round(h*max/w);w=max;}
+    const c=document.createElement('canvas'); c.width=w; c.height=h; c.getContext('2d').drawImage(img,0,0,w,h); res(c.toDataURL('image/jpeg',0.72)); };
+    img.src=e.target.result; }; r.readAsDataURL(file); }); }
+function closeModal(){ $('#modalRoot').innerHTML=''; }
+function barColor(i){ return ['#f5f5f7,#1d1d1f','#e8e8ed,#1d1d1f','#e0e0e4,#1d1d1f','#d8d8de,#1d1d1f','#efeff2,#1d1d1f','#e4e4e9,#1d1d1f','#dcdce1,#1d1d1f'][i%7]; }
+
+/* =========================================================
+ * 主页｜复盘 + 推荐做法 + 模块卡片
+ * ========================================================= */
+function homeAdvice(){
+  const t=todayStr(), adv=[];
+  const overdue=Store.coll('todos').filter(x=>!x.done&&x.due<t&&!x.name.startsWith('历史任务'));
+  if(overdue.length) adv.push({icon:'<i class="fa-solid fa-triangle-exclamation"></i>',text:`有 ${overdue.length} 条逾期待办滚存到今天，先用一个 25 分钟番茄钟清理「${overdue[0].name}」`,go:'todos'});
+  const log=Store.coll('wordLogs').find(x=>x.date===t);
+  if(!log||!log.checked) adv.push({icon:'<i class="fa-solid fa-book-open"></i>',text:`今天还没打卡单词（目标 ${Store.data.meta.wordTarget} 个），连续打卡 ${wordStreak()} 天别断档`,go:'words'});
+  const behind=Store.coll('progress').filter(x=>x.status!=='已掌握'&&x.plan<t);
+  if(behind.length) adv.push({icon:'<i class="fa-solid fa-chart-line"></i>',text:`「${behind[0].name}」计划日期已过（当前 ${behind[0].pct}%），今晚安排 1 小时专项补上`,go:'progress'});
+  const urgent=Store.coll('ddls').filter(x=>!x.done).map(x=>({x,r:dayDiff(x.due,t)})).filter(o=>o.r>=0&&o.r<=3)[0];
+  if(urgent) adv.push({icon:'<i class="fa-solid fa-hourglass-half"></i>',text:`「${urgent.x.name}」只剩 ${urgent.r} 天，确认准备情况，必要时转为待办`,go:'ddls'});
+  const dm=misDue();
+  if(dm.length) adv.push({icon:'<i class="fa-solid fa-circle-xmark"></i>',text:`有 ${dm.length} 道错题到复习期了（按遗忘曲线排的），趁热打铁过一遍`,go:'mistakes'});
+  const tcs=todayCourses();
+  if(tcs.length){ const c=tcs[0]; adv.push({icon:'<i class="fa-solid fa-calendar-week"></i>',text:`今天有 ${tcs.length} 节课，最近一节：${c.name} ${SECTION_TIMES[c.secStart-1].split('-')[0]} @ ${c.place}`,go:'courses'}); }
+  if(!Store.coll('notes').some(n=>n.date===t)) adv.push({icon:'<i class="fa-solid fa-pen-to-square"></i>',text:'睡前写一条日复盘，3 行就够：完成了什么 / 卡在哪 / 明天第一件事',go:'notes'});
+  if(!adv.length) adv.push({icon:'<i class="fa-solid fa-circle-check"></i>',text:'今日事项全部清空！去数据总览回顾一周成果，或预习明天的内容',go:'dash'});
+  return adv;
+}
+function homeCard(icon,name,inner,goId){
+  return `<div class="home-card" onclick="go('${goId}')">
+    <div class="hc-head">${icon} ${name}<span class="arrow">›</span></div>${inner}</div>`;
+}
+function renderHome(){
+  const t=todayStr();
+  /* 复盘区 */
+  const notes=[...Store.coll('notes')].sort((a,b)=>b.date.localeCompare(a.date));
+  const latest=notes[0];
+  const hasToday=notes.some(n=>n.date===t);
+  /* 各模块缩略数据 */
+  const todos=Store.coll('todos').filter(x=>!x.name.startsWith('历史任务'));
+  const todayAll=todos.filter(x=>x.due<=t), todayDone=todayAll.filter(x=>x.done);
+  const todoPct=todayAll.length?todayDone.length/todayAll.length*100:100;
+  const overdueN=todos.filter(x=>!x.done&&x.due<t).length;
+  const tcs=todayCourses();
+  const log=Store.coll('wordLogs').find(x=>x.date===t);
+  const target=Store.data.meta.wordTarget, doneW=log?log.done:0;
+  const overall=Math.round((subjAvg('数学')+subjAvg('英语')+subjAvg('政治'))/3);
+  const behindN=Store.coll('progress').filter(x=>x.status!=='已掌握'&&x.plan<t).length;
+  const nextDdl=Store.coll('ddls').filter(x=>!x.done).sort((a,b)=>dayDiff(a.due,t)-dayDiff(b.due,t))[0];
+  const [wm,ws]=weekRange();
+  const weekWords=Store.coll('wordLogs').filter(x=>x.date>=wm&&x.date<=ws).reduce((s,x)=>s+(x.done||0),0);
+  $('#view').innerHTML = `
+  <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(320px,1fr));margin-bottom:18px">
+    <div class="card">
+      <h3><i class="fa-solid fa-pen-to-square"></i> 复盘 <span class="muted" style="font-weight:400;font-size:12px">${hasToday?'今天已写':'今天还没写'}</span>
+        <button class="btn sm" style="margin-left:auto" onclick="Notes.edit()">${hasToday?'✎ 编辑今日复盘':'＋ 写今日复盘'}</button></h3>
+      ${latest?`
+        <div class="row" style="margin-bottom:8px"><b>${latest.date}</b><span class="tag cat">${latest.type}</span><span>${latest.mood||''}</span></div>
+        ${latest.done?`<div style="font-size:13px;line-height:1.8;margin-bottom:6px"><span class="tag green">完成</span> <span style="white-space:pre-wrap">${esc(latest.done).slice(0,120)}${latest.done.length>120?'…':''}</span></div>`:''}
+        ${latest.problem?`<div style="font-size:13px;line-height:1.8;margin-bottom:6px"><span class="tag red">问题</span> <span style="white-space:pre-wrap">${esc(latest.problem).slice(0,80)}${latest.problem.length>80?'…':''}</span></div>`:''}
+        ${latest.tomorrow?`<div style="font-size:13px;line-height:1.8"><span class="tag blue">明日</span> <span style="white-space:pre-wrap">${esc(latest.tomorrow).slice(0,80)}${latest.tomorrow.length>80?'…':''}</span></div>`:''}
+        <div class="muted mt" style="cursor:pointer" onclick="go('notes')">查看全部 ${notes.length} 条复盘 ›</div>`
+      :'<div class="muted" style="padding:14px 0">还没有复盘记录，写第一条吧——坚持复盘是提分最快的好习惯。</div>'}
+    </div>
+    <div class="card">
+      <h3><i class="fa-solid fa-lightbulb"></i> 推荐做法 <span class="muted" style="font-weight:400;font-size:12px">根据你的数据实时生成</span></h3>
+      ${homeAdvice().map(a=>`<div class="advice-item" onclick="go('${a.go}')"><span>${a.icon}</span><span class="adv-text grow">${esc(a.text)}</span><span style="color:#c3c9dc">›</span></div>`).join('')}
+    </div>
+  </div>
+  <div class="section-title"><i class="fa-solid fa-house"></i> 主页 <span class="muted" style="font-weight:400;font-size:12px">点击卡片进入对应模块</span></div>
+  <div class="home-cards">
+    ${homeCard('<i class="fa-solid fa-list-check"></i>','今日待办',`<div class="row">${ringSVG(todoPct,64,8,'var(--vivid)')}<div><div class="hc-big">${todayDone.length}/${todayAll.length}</div><div class="hc-sub">今日完成${overdueN?` · <span style="color:var(--danger)">${overdueN} 条逾期</span>`:''}</div></div></div>`,'todos')}
+    ${homeCard('<i class="fa-solid fa-calendar-week"></i>','我的课表',tcs.length?`<div class="hc-big">${tcs.length} 节课</div><div class="hc-sub">最近：${esc(tcs[0].name)}<br>${SECTION_TIMES[tcs[0].secStart-1].split('-')[0]} @ ${esc(tcs[0].place)}</div>`:`<div class="hc-big">无课</div><div class="hc-sub">今天没有课，自由安排</div>`,'courses')}
+    ${homeCard('<i class="fa-solid fa-book-open"></i>','单词打卡',`<div class="row">${ringSVG(doneW/target*100,64,8,'var(--vivid)')}<div><div class="hc-big">${doneW}/${target}</div><div class="hc-sub"><i class="fa-solid fa-fire"></i> 连续 ${wordStreak()} 天 · 本周 ${weekWords} 词</div></div></div>`,'words')}
+    ${homeCard('<i class="fa-solid fa-chart-line"></i>','考研进度',`<div class="hc-big">${overall}%</div><div class="progress-track"><div class="progress-fill" style="width:${overall}%"></div></div><div class="hc-sub">数 ${Math.round(subjAvg('数学'))}% · 英 ${Math.round(subjAvg('英语'))}% · 政 ${Math.round(subjAvg('政治'))}%${behindN?` · <span style="color:var(--danger)">${behindN} 项落后</span>`:''}</div>`,'progress')}
+    ${homeCard('<i class="fa-solid fa-circle-xmark"></i>','错题复习',(()=>{const ms=Store.coll('mistakes'),due=ms.filter(m=>m.status!=='已掌握'&&(m.nextReview||'')<=t),mast=ms.length?Math.round(ms.filter(m=>m.status==='已掌握').length/ms.length*100):0;
+      return `<div class="hc-big" style="color:${due.length?'var(--danger)':'var(--ink)'}">${due.length} 道</div><div class="hc-sub">今日待复习 · 共 ${ms.length} 道 · 掌握率 ${mast}%</div>`;})(),'mistakes')}
+    ${homeCard('<i class="fa-solid fa-pen-to-square"></i>','复盘笔记',`<div class="hc-big">${notes.length} 条</div><div class="hc-sub">${latest?'最近：'+latest.date+' '+latest.type+' '+(latest.mood||''):'还没开始写'}</div>`,'notes')}
+    ${homeCard('<i class="fa-solid fa-chart-pie"></i>','数据总览',`<div class="hc-sub" style="font-size:13px;line-height:2">完成率 <b>${Math.round(todoPct)}%</b> · 打卡 <b>${wordStreak()}</b> 天<br>总进度 <b>${overall}%</b> · 本周 <b>${weekWords}</b> 词</div>`,'dash')}
+    ${homeCard('<i class="fa-solid fa-hourglass-half"></i>','DDL 倒计时',nextDdl?`<div class="hc-big" style="color:${dayDiff(nextDdl.due,t)<=3?'var(--danger)':'var(--ink)'}">${dayDiff(nextDdl.due,t)} 天</div><div class="hc-sub">最近：${esc(nextDdl.name)}<br>${nextDdl.due} 截止</div>`:`<div class="hc-big">无</div><div class="hc-sub">暂无待办 DDL</div>`,'ddls')}
+    ${homeCard('<i class="fa-solid fa-wand-magic-sparkles"></i>','AI 学习助手',`<div class="hc-sub" style="font-size:13px;line-height:1.9">问我数据 · 查待办 · 出建议 · 写复盘<br>${API.ai.configured()?'<span class="tag green">已接 AI</span>':'<span class="tag orange">引导态 · 快捷指令可用</span>'}</div>`,'__ai')}
+  </div>`;
+}
+/* 主页 AI 卡片：跳到抽屉而不是模块 */
+const _origGo = go;
+go = function(m){ if(m==='__ai'){ AI.open(); return; } _origGo(m); };
+
+/* =========================================================
+ * 模块 1｜今日待办
+ * ========================================================= */
+let todoFilter='today';
+const Todo = {
+  done(id){ const it=Store.coll('todos').find(x=>x.id===id); if(!it)return;
+    if(it.done){ API.data.update('todos',id,{done:false,doneAt:null}); }
+    else{ API.data.update('todos',id,{done:true,doneAt:new Date().toISOString()});
+      const map={'学习':'数学','生活':'其他','社团':'其他','其他':'其他'}; Store.data.meta.studyMinutes[map[it.cat]||'其他']+=25; Store.save(); }
+    renderAll(); },
+  del(id){ if(confirm('删除这条待办？')){ API.data.remove('todos',id); renderAll(); } },
+  addQuick(){
+    const name=$('#qa-name').value.trim(); if(!name) return alert('请输入任务名');
+    API.data.create('todos',{name,priority:$('#qa-pri').value,cat:$('#qa-cat').value,due:$('#qa-due').value||todayStr(),done:false,note:'',createdAt:todayStr()});
+    renderAll();
+  },
+  setFilter(f){ todoFilter=f; renderAll(); }
+};
+function renderTodos(){
+  const t=todayStr(), all=Store.coll('todos').filter(x=>!x.name.startsWith('历史任务'));
+  let list = todoFilter==='today' ? all.filter(x=>x.due<=t) : todoFilter==='week' ? all.filter(x=>inThisWeek(x.due)) : all;
+  list = [...list].sort((a,b)=> a.done-b.done || a.due.localeCompare(b.due) || a.priority.localeCompare(b.priority));
+  const todayAll = all.filter(x=>x.due<=t), todayDone = todayAll.filter(x=>x.done);
+  const pct = todayAll.length? todayDone.length/todayAll.length*100 : 100;
+  const rows = list.map(x=>`
+    <div class="todo-item ${x.done?'done':''} ${(!x.done&&x.due<t)?'overdue':''}">
+      <div class="todo-check ${x.done?'on':''}" onclick="Todo.done('${x.id}')">${x.done?'✓':''}</div>
+      <div class="grow">
+        <div class="t-name" style="font-weight:600">${esc(x.name)}</div>
+        <div class="muted">截止 ${x.due}${!x.done&&x.due<t?' · 已逾期':''}${x.note?' · '+esc(x.note):''}${x.done&&x.doneAt?' · 完成于 '+x.doneAt.slice(5,16).replace('T',' '):''}</div>
+      </div>
+      <span class="tag ${x.priority.toLowerCase()}">${x.priority}</span>
+      <span class="tag cat">${esc(x.cat)}</span>
+      <button class="btn sm danger-ghost" onclick="Todo.del('${x.id}')">删</button>
+    </div>`).join('');
+  $('#view').innerHTML = `
+    <div class="section-title"><i class="fa-solid fa-list-check"></i> 今日待办</div>
+    <div class="grid" style="grid-template-columns:1fr;gap:14px">
+      <div class="card">
+        <div class="quick-add">
+          <input class="field" id="qa-name" placeholder="快速添加任务，回车确认" onkeydown="if(event.key==='Enter')Todo.addQuick()">
+          <select class="field" id="qa-pri"><option>P0</option><option selected>P1</option><option>P2</option></select>
+          <select class="field" id="qa-cat"><option>学习</option><option>生活</option><option>社团</option><option>其他</option></select>
+          <input class="field" type="date" id="qa-due" value="${t}" style="width:150px">
+          <button class="btn" onclick="Todo.addQuick()">＋ 添加</button>
+        </div>
+        <div class="row" style="justify-content:space-between;margin-bottom:6px">
+          <div class="filter-tabs">
+            ${['today','week','all'].map(f=>`<button class="${todoFilter===f?'active':''}" onclick="Todo.setFilter('${f}')">${{today:'今天',week:'本周',all:'全部'}[f]}</button>`).join('')}
+          </div>
+          <span class="muted">今日完成 ${todayDone.length}/${todayAll.length}</span>
+        </div>
+        ${rows || '<div class="muted" style="padding:20px;text-align:center">暂无任务，添加一条吧</div>'}
+      </div>
+      <div class="card" style="display:flex;align-items:center;gap:22px;flex-wrap:wrap">
+        ${ringSVG(pct,110,11,'var(--accent)','今日完成率')}
+        <div class="muted" style="line-height:2">完成率按「截止 ≤ 今天」的任务计算（含逾期）。<br>完成任务自动折算 25 分钟学习时间，计入数据总览的时间分配。</div>
+      </div>
+    </div>`;
+}
+
+/* =========================================================
+ * 模块 2｜我的课表
+ * ========================================================= */
+let courseWeek = weekNum(todayStr());
+function courseActiveOn(c, ds){
+  const wn = weekNum(ds);
+  if(wn<c.weeks[0]||wn>c.weeks[1]) return false;
+  if(c.parity===1 && wn%2!==1) return false;
+  if(c.parity===2 && wn%2!==0) return false;
+  return c.dow===dow(ds);
+}
+function todayCourses(){ const t=todayStr(); return Store.coll('courses').filter(c=>courseActiveOn(c,t)).sort((a,b)=>a.secStart-b.secStart); }
+const Course = {
+  setWeek(w){ courseWeek=Math.min(20,Math.max(1,w)); renderAll(); },
+  edit(id){
+    const c = id? Store.coll('courses').find(x=>x.id===id) : {name:'',teacher:'',place:'',dow:1,secStart:1,secEnd:2,weeks:[1,16],parity:0,note:''};
+    openModal(`<h3>${id?'编辑':'新增'}课程</h3>
+      <div class="frow"><label>课程名</label><input class="field" id="cf-name" value="${esc(c.name)}"></div>
+      <div class="row"><div class="frow grow"><label>教师</label><input class="field" id="cf-teacher" value="${esc(c.teacher)}"></div>
+      <div class="frow grow"><label>地点</label><input class="field" id="cf-place" value="${esc(c.place)}"></div></div>
+      <div class="row">
+        <div class="frow grow"><label>星期</label><select class="field" id="cf-dow">${[1,2,3,4,5,6,7].map(d=>`<option value="${d}" ${c.dow===d?'selected':''}>${DOW_NAME[d]}</option>`).join('')}</select></div>
+        <div class="frow grow"><label>开始节</label><input class="field" type="number" id="cf-s1" min="1" max="12" value="${c.secStart}"></div>
+        <div class="frow grow"><label>结束节</label><input class="field" type="number" id="cf-s2" min="1" max="12" value="${c.secEnd}"></div>
+      </div>
+      <div class="row">
+        <div class="frow grow"><label>起始周</label><input class="field" type="number" id="cf-w1" min="1" max="20" value="${c.weeks[0]}"></div>
+        <div class="frow grow"><label>结束周</label><input class="field" type="number" id="cf-w2" min="1" max="20" value="${c.weeks[1]}"></div>
+        <div class="frow grow"><label>单双周</label><select class="field" id="cf-par"><option value="0" ${c.parity===0?'selected':''}>每周</option><option value="1" ${c.parity===1?'selected':''}>单周</option><option value="2" ${c.parity===2?'selected':''}>双周</option></select></div>
+      </div>
+      <div class="frow"><label>备注</label><input class="field" id="cf-note" value="${esc(c.note)}"></div>
+      <div class="fbtns">${id?`<button class="btn danger-ghost" onclick="Course.del('${id}')">删除</button>`:''}<button class="btn ghost" onclick="closeModal()">取消</button><button class="btn" onclick="Course.save('${id||''}')">保存</button></div>`);
+  },
+  save(id){
+    const v={ name:$('#cf-name').value.trim(), teacher:$('#cf-teacher').value.trim(), place:$('#cf-place').value.trim(),
+      dow:+$('#cf-dow').value, secStart:+$('#cf-s1').value, secEnd:+$('#cf-s2').value,
+      weeks:[+$('#cf-w1').value,+$('#cf-w2').value], parity:+$('#cf-par').value, note:$('#cf-note').value.trim() };
+    if(!v.name) return alert('请填写课程名');
+    if(id) API.data.update('courses',id,v); else API.data.create('courses',v);
+    closeModal(); renderAll();
+  },
+  del(id){ if(confirm('删除这门课？')){ API.data.remove('courses',id); closeModal(); renderAll(); } }
+};
+function renderCourses(){
+  const wn = courseWeek;
+  const visible = c => wn>=c.weeks[0]&&wn<=c.weeks[1]&&!(c.parity===1&&wn%2!==1)&&!(c.parity===2&&wn%2!==0);
+  const curWn = weekNum(todayStr()), now=new Date(), nowMin=now.getHours()*60+now.getMinutes(), todayDow=dow(todayStr());
+  let grid = `<table class="course-grid"><tr><th style="width:86px">节次</th>${[1,2,3,4,5,6,7].map(d=>`<th class="${wn===curWn&&d===todayDow?'':''}">${DOW_NAME[d]}</th>`).join('')}</tr>`;
+  for(let s=1;s<=12;s++){
+    grid += `<tr><td class="sec-cell">第 ${s} 节<br>${SECTION_TIMES[s-1]}</td>`;
+    for(let d=1;d<=7;d++){
+      const c = Store.coll('courses').find(c=>c.dow===d&&visible(c)&&s>=c.secStart&&s<=c.secEnd);
+      if(c){
+        const [bg,fg]=barColor(Store.coll('courses').indexOf(c)).split(',');
+        const [st,en]=SECTION_TIMES[s-1].split('-'); const stMin=+st.split(':')[0]*60+ +st.split(':')[1], enMin=+en.split(':')[0]*60+ +en.split(':')[1];
+        const isNow = wn===curWn && d===todayDow && nowMin>=stMin && nowMin<=enMin;
+        grid += `<td class="course-cell ${isNow?'now':''}" style="background:${bg};color:${fg}" onclick="Course.edit('${c.id}')">${s===c.secStart?`${esc(c.name)}<small>${esc(c.place)}</small>`:'·'}</td>`;
+      }else grid += `<td></td>`;
+    }
+    grid += `</tr>`;
+  }
+  grid += `</table>`;
+  const tcs = wn===curWn? todayCourses() : Store.coll('courses').filter(c=>c.dow===dow(todayStr())&&visible(c));
+  $('#view').innerHTML = `
+    <div class="section-title"><i class="fa-solid fa-calendar-week"></i> 我的课表
+      <span class="grow"></span>
+      <button class="btn ghost sm" onclick="Course.setWeek(${wn-1})">‹ 上一周</button>
+      <span class="tag cat">第 ${wn} 周${wn===curWn?'（本周）':''}</span>
+      <button class="btn ghost sm" onclick="Course.setWeek(${wn+1})">下一周 ›</button>
+      <button class="btn sm" onclick="Course.edit()">＋ 新增课程</button>
+    </div>
+    <div class="card course-grid-wrap">${grid}</div>
+    <div class="card today-course-list">
+      <h3>今日课程（第 ${curWn} 周）</h3>
+      ${todayCourses().map(c=>`<div class="row" style="padding:10px 0;border-bottom:1px solid var(--line)"><span class="tag cat">${SECTION_TIMES[c.secStart-1].split('-')[0]}</span><b>${esc(c.name)}</b><span class="muted">${esc(c.place)} · ${esc(c.teacher)}</span></div>`).join('') || '<div class="muted">今天没有课</div>'}
+    </div>
+    <div class="muted mt"><i class="fa-solid fa-circle-info"></i> 当前课程自动高亮；点击格子可编辑。第 1 周从 ${SEM_START}（周一）起算，可在代码顶部 SEM_START 修改。</div>`;
+}
+
+/* =========================================================
+ * 模块 3｜单词打卡
+ * ========================================================= */
+let wordBookId = null, wordTab='checkin', reciteIdx=0, reciteShow=false;
+const Words = {
+  tab(t){ wordTab=t; reciteIdx=0; reciteShow=false; renderAll(); },
+  pickBook(id){ wordBookId=id; renderAll(); },
+  checkin(){
+    const t=todayStr(); let log=Store.coll('wordLogs').find(x=>x.date===t);
+    const target=Store.data.meta.wordTarget;
+    if(!log){ log=API.data.create('wordLogs',{date:t,book:curBook()?.name||'考研核心词汇',target,done:0,minutes:0,checked:false}); }
+    if(log.checked){ API.data.update('wordLogs',log.id,{checked:false}); }
+    else { API.data.update('wordLogs',log.id,{checked:true,done:Math.max(log.done,target)}); }
+    renderAll();
+  },
+  setTarget(){ const v=+prompt('每日目标词数：',Store.data.meta.wordTarget); if(v>0){Store.data.meta.wordTarget=v;Store.save();renderAll();} },
+  recite(know){
+    const book=curBook(); if(!book)return;
+    const list=book.words.filter(w=>!w.mastered);
+    const w=list[reciteIdx]; if(w){ if(know){ w.mastered=1;
+      const t=todayStr(); let log=Store.coll('wordLogs').find(x=>x.date===t);
+      if(!log) log=API.data.create('wordLogs',{date:t,book:book.name,target:Store.data.meta.wordTarget,done:0,minutes:0,checked:false});
+      API.data.update('wordLogs',log.id,{done:log.done+1});
+    } book.updatedAt=new Date().toISOString(); Store.save(); }
+    reciteShow=false; reciteIdx = know||reciteIdx>=list.length-1 ? reciteIdx+1 : reciteIdx+1;
+    if(reciteIdx>=list.length){ reciteIdx=0; alert('本轮生词全部过完了！'); }
+    renderAll();
+  },
+  flip(){ reciteShow=true; renderAll(); },
+  importUI(){
+    openModal(`<h3>导入词汇</h3>
+      <div class="frow"><label>目标词书</label><select class="field" id="imp-book">
+        ${Store.coll('wordBooks').map(b=>`<option value="${b.id}">${esc(b.name)}</option>`).join('')}
+        <option value="__new__">＋ 新建词书…</option></select></div>
+      <div class="frow" id="imp-newname" style="display:none"><label>新词书名</label><input class="field" id="imp-bookname" placeholder="如：真题高频词"></div>
+      <div class="frow"><label>方式一：选择文件（CSV / TXT / JSON）</label><input class="field" type="file" accept=".csv,.txt,.json" onchange="Words.file(this)"></div>
+      <div class="frow"><label>方式二：粘贴（Excel 复制按 Tab 自动解析，或 CSV / TXT / JSON 文本）</label>
+      <textarea class="field" id="imp-text" rows="6" placeholder="单词,音标,释义,例句&#10;abandon,/əˈbændən/,v. 放弃,He abandoned the plan.&#10;或直接粘贴 Excel 单元格"></textarea></div>
+      <div class="fbtns"><button class="btn ghost" onclick="closeModal()">取消</button><button class="btn" onclick="Words.preview()">解析并预览</button></div>
+      <div id="imp-preview"></div>`);
+    $('#imp-book').onchange = e=> $('#imp-newname').style.display = e.target.value==='__new__'?'block':'none';
+  },
+  file(input){ const f=input.files[0]; if(!f)return; const r=new FileReader(); r.onload=()=>{ $('#imp-text').value=r.result; }; r.readAsText(f); },
+  parse(text){
+    text=text.trim(); if(!text) return [];
+    if(text.startsWith('[')){ try{ const j=JSON.parse(text); return j.map(o=>({word:String(o.word||'').trim(),phonetic:o.phonetic||'',meaning:o.meaning||'',example:o.example||''})).filter(x=>x.word); }catch(e){ return []; } }
+    const lines=text.split(/\r?\n/).filter(l=>l.trim());
+    let start=0;
+    if(/单词|word/i.test(lines[0]) && /释义|meaning|解释/i.test(lines[0])) start=1;
+    const out=[];
+    for(let i=start;i<lines.length;i++){
+      let parts;
+      if(lines[i].includes('\t')) parts=lines[i].split('\t');
+      else if(lines[i].includes(',')) parts=lines[i].split(',');
+      else { const m=lines[i].trim().split(/\s+(.+)/); parts=[m[0],'',m[1]||'','']; }
+      const w={word:(parts[0]||'').trim(), phonetic:(parts[1]||'').trim(), meaning:(parts[2]||'').trim(), example:(parts[3]||'').trim()};
+      if(w.word && /^[a-zA-Z][a-zA-Z' -]*$/.test(w.word)) out.push(w);
+    }
+    return out;
+  },
+  preview(){
+    const words=this.parse($('#imp-text').value);
+    if(!words.length) return alert('没解析到有效词条，请检查格式');
+    window._impWords=words;
+    $('#imp-preview').innerHTML = `<div class="muted" style="margin:10px 0">共解析 <b>${words.length}</b> 条，预览前 ${Math.min(10,words.length)} 条：</div>
+      <table style="width:100%;border-collapse:collapse;font-size:12px">${words.slice(0,10).map(w=>`<tr><td style="border:1px solid var(--line);padding:5px"><b>${esc(w.word)}</b></td><td style="border:1px solid var(--line);padding:5px">${esc(w.phonetic)}</td><td style="border:1px solid var(--line);padding:5px">${esc(w.meaning)}</td></tr>`).join('')}</table>
+      <div class="fbtns"><button class="btn green" onclick="Words.confirmImport()">确认导入（自动去重）</button></div>`;
+  },
+  confirmImport(){
+    const sel=$('#imp-book').value; let book;
+    if(sel==='__new__'){ const nm=$('#imp-bookname').value.trim()||'未命名词书'; book=API.data.create('wordBooks',{name:nm,createdAt:todayStr(),words:[]}); }
+    else book=Store.coll('wordBooks').find(b=>b.id===sel);
+    const exist=new Set(book.words.map(w=>w.word.toLowerCase()));
+    let imported=0,duplicated=0;
+    for(const w of window._impWords){ if(exist.has(w.word.toLowerCase())){duplicated++;continue;} book.words.push({id:uid(),...w,unit:Math.ceil((book.words.length+1)/20),mastered:0}); imported++; }
+    book.updatedAt=new Date().toISOString(); Store.save(); wordBookId=book.id; closeModal(); renderAll();
+    alert(`导入完成：新增 ${imported} 条，重复跳过 ${duplicated} 条`);
+  }
+};
+function curBook(){ return Store.coll('wordBooks').find(b=>b.id===wordBookId) || Store.coll('wordBooks')[0]; }
+function wordStreak(){
+  let s=0; const logs=Store.coll('wordLogs'); const t=todayStr();
+  const has=d=>logs.some(x=>x.date===d&&x.checked);
+  let d = has(t)? t : addDays(t,-1);
+  while(has(d)){ s++; d=addDays(d,-1); }
+  return s;
+}
+function heatSVG(days,color){
+  const t=todayStr(); const logs=Store.coll('wordLogs');
+  const start=addDays(t,-(dow(t)-1)-(days/7-1)*7);
+  let cells='', max=Store.data.meta.wordTarget||100;
+  for(let w=0;w<days/7;w++) for(let r=0;r<7;r++){
+    const d=addDays(start,w*7+r); if(d>t) continue;
+    const log=logs.find(x=>x.date===d);
+    const v=log&&log.checked? Math.min(1,(log.done||1)/max):0;
+    const shade = v===0?'#e8e8ed': v<.4?'#c2dcff': v<.7?'#7fb8ff': v<1?'#3d9bff':'#0a84ff';
+    cells+=`<rect x="${w*14}" y="${r*14}" width="11" height="11" rx="3" fill="${shade}"><title>${d}：${log?log.done:0} 词</title></rect>`;
+  }
+  return `<svg width="${(days/7)*14}" height="${7*14}" style="max-width:100%">${cells}</svg>`;
+}
+function barChartSVG(pairs,{w=520,h=160,color='var(--vivid)'}={}){
+  const max=Math.max(1,...pairs.map(p=>p[1])); const bw=w/pairs.length;
+  let bars='';
+  pairs.forEach((p,i)=>{ const bh=(h-30)*p[1]/max;
+    bars+=`<rect x="${i*bw+bw*0.22}" y="${h-24-bh}" width="${bw*0.56}" height="${bh}" rx="4" fill="${color}"><title>${p[0]}：${p[1]}</title></rect>
+    <text x="${i*bw+bw/2}" y="${h-8}" text-anchor="middle" font-size="9" fill="var(--muted)">${p[0]}</text>`; });
+  return `<svg viewBox="0 0 ${w} ${h}" style="width:100%">${bars}</svg>`;
+}
+function renderWords(){
+  if(!wordBookId && Store.coll('wordBooks')[0]) wordBookId=Store.coll('wordBooks')[0].id;
+  const book=curBook(), t=todayStr();
+  const log=Store.coll('wordLogs').find(x=>x.date===t);
+  const target=Store.data.meta.wordTarget, doneW=log?log.done:0, checked=log&&log.checked;
+  const streak=wordStreak();
+  const [wm,ws]=weekRange();
+  const weekSum=Store.coll('wordLogs').filter(x=>x.date>=wm&&x.date<=ws).reduce((s,x)=>s+(x.done||0),0);
+  const monthSum=Store.coll('wordLogs').filter(x=>x.date.slice(0,7)===t.slice(0,7)).reduce((s,x)=>s+(x.done||0),0);
+  const weekBars=[0,1,2,3,4,5,6].map(i=>{ const d=addDays(wm,i); const l=Store.coll('wordLogs').find(x=>x.date===d); return [DOW_NAME[i+1].slice(1), l?l.done:0]; });
+  let body='';
+  if(wordTab==='checkin'){
+    body=`<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(300px,1fr))">
+      <div class="card"><h3><i class="fa-solid fa-calendar-check"></i> 今日打卡 <button class="btn sm ghost" style="margin-left:auto" onclick="Words.setTarget()">目标 ${target} 词</button></h3>
+        <div class="stat-ring-wrap">
+          ${ringSVG(doneW/target*100,110,11, checked?'var(--ok)':'var(--vivid)', `${doneW}/${target} 词`)}
+          <div>
+            <div style="font-size:15px;font-weight:700;margin-bottom:6px">${checked?'<i class="fa-solid fa-circle-check"></i> 今日已打卡':'还没打卡哦'}</div>
+            <div class="muted" style="margin-bottom:10px"><i class="fa-solid fa-fire"></i> 连续打卡 <b>${streak}</b> 天</div>
+            <button class="btn ${checked?'ghost':'green'}" onclick="Words.checkin()">${checked?'取消打卡':'一键打卡'}</button>
+          </div>
+        </div></div>
+      <div class="card"><h3><i class="fa-solid fa-border-all"></i> 近 30 天热力图</h3>${heatSVG(35)}<div class="muted mt">颜色越深背得越多（悬停看明细）</div></div>
+      <div class="card"><h3><i class="fa-solid fa-chart-column"></i> 本周 / 本月累计</h3>
+        <div class="row" style="margin-bottom:10px"><span class="tag green">本周 ${weekSum} 词</span><span class="tag cat">本月 ${monthSum} 词</span></div>
+        ${barChartSVG(weekBars)}</div>
+    </div>`;
+  }else if(wordTab==='books'){
+    const units={}; (book?.words||[]).forEach(w=>{ (units[w.unit]=units[w.unit]||[]).push(w); });
+    body=`<div class="grid" style="grid-template-columns:1fr;gap:14px">
+      <div class="card"><h3><i class="fa-solid fa-book"></i> 词书 <button class="btn sm" style="margin-left:auto" onclick="Words.importUI()"><i class="fa-solid fa-upload"></i> 导入词汇</button></h3>
+        <div class="row">${Store.coll('wordBooks').map(b=>`<div class="word-book-card ${b.id===book?.id?'active':''}" onclick="Words.pickBook('${b.id}')"><b>${esc(b.name)}</b><span class="muted">${b.words.length} 词 · 已会 ${b.words.filter(w=>w.mastered).length}</span></div>`).join('')}</div></div>
+      <div class="card"><h3>${esc(book?.name||'')} · 按单元分组</h3>
+        ${Object.keys(units).sort((a,b)=>a-b).map(u=>`<div class="tag cat" style="margin:12px 0 4px">Unit ${u}（${units[u].length} 词）</div>${units[u].map(w=>`<div class="word-item"><span class="w">${esc(w.word)}</span><span class="ph">${esc(w.phonetic)}</span><span class="grow">${esc(w.meaning)}</span>${w.mastered?'<span class="tag done">已掌握</span>':'<span class="tag gray">生词</span>'}</div>`).join('')}`).join('') || '<div class="muted">词书为空，去导入吧</div>'}
+      </div></div>`;
+  }else{ /* recite */
+    const list=(book?.words||[]).filter(w=>!w.mastered);
+    const w=list[Math.min(reciteIdx,list.length-1)];
+    body=`<div class="card" style="max-width:560px;margin:0 auto">
+      <h3><i class="fa-solid fa-layer-group"></i> 卡片背诵 <span class="muted" style="margin-left:auto;font-weight:400">剩余生词 ${list.length} 个</span></h3>
+      ${w?`<div class="flash-card" onclick="Words.flip()">
+          <div class="fw">${esc(w.word)}</div><div class="fp">${esc(w.phonetic)}</div>
+          ${reciteShow?`<div class="fm">${esc(w.meaning)}${w.example?'<div style="opacity:.8;font-size:13px;margin-top:6px">'+esc(w.example)+'</div>':''}</div>`:'<div class="fp" style="font-size:12px">点击卡片查看释义</div>'}
+        </div>
+        <div class="row mt" style="justify-content:center">
+          <button class="btn danger-ghost" onclick="Words.recite(false)"><i class="fa-regular fa-face-frown"></i> 不认识</button>
+          <button class="btn green" onclick="Words.recite(true)"><i class="fa-regular fa-face-smile"></i> 认识</button>
+        </div>`
+      :'<div class="muted" style="text-align:center;padding:40px 0"><i class="fa-solid fa-circle-check"></i> 这本书没有生词了，换一本或导入新词</div>'}
+    </div>`;
+  }
+  $('#view').innerHTML = `<div class="section-title"><i class="fa-solid fa-book-open"></i> 单词打卡
+    <span class="grow"></span>
+    <div class="filter-tabs">${[['checkin','打卡'],['books','词书'],['recite','背诵模式']].map(x=>`<button class="${wordTab===x[0]?'active':''}" onclick="Words.tab('${x[0]}')">${x[1]}</button>`).join('')}</div>
+  </div>${body}`;
+}
+
+/* =========================================================
+ * 模块 4｜考研学习进度
+ * ========================================================= */
+let progSubj='数学';
+const SUBS={'数学':['高数','线代','概率论'],'英语':['词汇','阅读','写作','翻译'],'政治':['马原','毛中特','史纲','思修法基','时政']};
+const Prog = {
+  subj(s){ progSubj=s; renderAll(); },
+  bump(id,d){ const it=Store.coll('progress').find(x=>x.id===id); const pct=Math.min(100,Math.max(0,it.pct+d));
+    API.data.update('progress',id,{pct, status: pct===100?'已掌握': pct>0?'进行中':'未开始'}); renderAll(); },
+  setStatus(id,s){ API.data.update('progress',id,{status:s, pct: s==='已掌握'?100: s==='未开始'?0: Math.max(1,Store.coll('progress').find(x=>x.id===id).pct)}); renderAll(); },
+  edit(id){
+    const c=id?Store.coll('progress').find(x=>x.id===id):{subject:progSubj,sub:SUBS[progSubj][0],name:'',status:'未开始',pct:0,plan:todayStr(),note:''};
+    openModal(`<h3>${id?'编辑':'新增'}条目</h3>
+      <div class="frow"><label>条目名</label><input class="field" id="pf-name" value="${esc(c.name)}"></div>
+      <div class="row"><div class="frow grow"><label>科目</label><select class="field" id="pf-subj" onchange="document.querySelector('#pf-sub').innerHTML=SUBS[this.value].map(s=>'<option>'+s+'</option>').join('')">${Object.keys(SUBS).map(s=>`<option ${c.subject===s?'selected':''}>${s}</option>`).join('')}</select></div>
+      <div class="frow grow"><label>分项</label><select class="field" id="pf-sub">${SUBS[c.subject].map(s=>`<option ${c.sub===s?'selected':''}>${s}</option>`).join('')}</select></div>
+      <div class="frow grow"><label>计划完成日</label><input class="field" type="date" id="pf-plan" value="${c.plan}"></div></div>
+      <div class="frow"><label>备注</label><input class="field" id="pf-note" value="${esc(c.note)}"></div>
+      <div class="fbtns">${id?`<button class="btn danger-ghost" onclick="Prog.del('${id}')">删除</button>`:''}<button class="btn ghost" onclick="closeModal()">取消</button><button class="btn" onclick="Prog.save('${id||''}')">保存</button></div>`);
+  },
+  save(id){ const v={name:$('#pf-name').value.trim(),subject:$('#pf-subj').value,sub:$('#pf-sub').value,plan:$('#pf-plan').value,note:$('#pf-note').value.trim()};
+    if(!v.name) return alert('请填写条目名');
+    if(id) API.data.update('progress',id,v); else API.data.create('progress',{...v,status:'未开始',pct:0});
+    closeModal(); renderAll(); },
+  del(id){ if(confirm('删除该条目？')){API.data.remove('progress',id);closeModal();renderAll();} }
+};
+function subjAvg(s){ const l=Store.coll('progress').filter(x=>x.subject===s); return l.length? l.reduce((a,x)=>a+x.pct,0)/l.length:0; }
+function renderProgress(){
+  const t=todayStr();
+  const list=Store.coll('progress').filter(x=>x.subject===progSubj);
+  const overall=(subjAvg('数学')+subjAvg('英语')+subjAvg('政治'))/3;
+  const behind=Store.coll('progress').filter(x=>x.status!=='已掌握'&&x.plan<t);
+  const groups={}; list.forEach(x=>{(groups[x.sub]=groups[x.sub]||[]).push(x);});
+  $('#view').innerHTML = `<div class="section-title"><i class="fa-solid fa-chart-line"></i> 考研学习进度 <span class="grow"></span><button class="btn sm" onclick="Prog.edit()">＋ 新增条目</button></div>
+  <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(300px,1fr));margin-bottom:14px">
+    <div class="card stat-ring-wrap">${ringSVG(overall,110,11,'var(--primary)','总体进度')}
+      <div>${['数学','英语','政治'].map(s=>`<div style="margin-bottom:8px"><div class="row" style="justify-content:space-between;width:190px"><span>${s}</span><b>${Math.round(subjAvg(s))}%</b></div><div class="progress-track" style="width:190px"><div class="progress-fill" style="width:${subjAvg(s)}%"></div></div></div>`).join('')}</div></div>
+    <div class="card"><h3><i class="fa-solid fa-triangle-exclamation"></i> 落后预警</h3>${behind.length? behind.map(x=>`<div class="row" style="padding:7px 0;border-bottom:1px solid var(--line)"><span class="tag red">超期 ${dayDiff(t,x.plan)} 天</span><b>${esc(x.name)}</b><span class="muted">${x.subject} · ${x.pct}%</span></div>`).join('') : '<div class="muted">计划日期已过但未完成的条目会在这里标红，目前没有 <i class="fa-solid fa-circle-check"></i></div>'}</div>
+  </div>
+  <div class="subj-tabs">${Object.keys(SUBS).map(s=>`<button class="${progSubj===s?'active':''}" onclick="Prog.subj('${s}')">${s}</button>`).join('')}</div>
+  <div class="card">${Object.keys(groups).map(sub=>`
+    <div class="tag cat" style="margin:10px 0 2px">${sub}</div>
+    ${groups[sub].map(x=>{const late=x.status!=='已掌握'&&x.plan<t; return `
+      <div class="prog-item">
+        <div class="row">
+          <b style="width:180px">${esc(x.name)} ${late?'<span class="tag red">落后</span>':''}</b>
+          <select class="field" style="width:96px" onchange="Prog.setStatus('${x.id}',this.value)">${['未开始','进行中','已掌握'].map(s=>`<option ${x.status===s?'selected':''}>${s}</option>`).join('')}</select>
+          <button class="btn sm ghost" onclick="Prog.bump('${x.id}',-10)">−10%</button>
+          <div class="progress-track grow"><div class="progress-fill ${x.pct===100?'green':''}" style="width:${x.pct}%"></div></div>
+          <b style="width:44px;text-align:right">${x.pct}%</b>
+          <button class="btn sm ghost" onclick="Prog.bump('${x.id}',10)">＋10%</button>
+          <button class="btn sm ghost" onclick="Prog.edit('${x.id}')">✎</button>
+        </div>
+        <div class="muted" style="margin-top:5px">计划 ${x.plan}${x.note?' · '+esc(x.note):''}</div>
+      </div>`;}).join('')}`).join('') || '<div class="muted" style="padding:20px;text-align:center">本科目还没有条目</div>'}
+  </div>`;
+}
+
+/* =========================================================
+ * 模块 4.5｜错题复习（文字 + 图片，艾宾浩斯复习调度，AI 分析）
+ * ========================================================= */
+let misSubj='全部', misStatus='全部', misQ='', misTab='list';
+let rq=[], rIdx=0, rShow=false;
+const MIS_SUBJ=['数学','英语','政治','其他'];
+function misDue(){ const t=todayStr(); return Store.coll('mistakes').filter(m=>m.status!=='已掌握' && (m.nextReview||t)<=t); }
+const Mis = {
+  tab(t2){ misTab=t2; if(t2==='review'){ rq=misDue(); rIdx=0; rShow=false; } renderAll(); },
+  setSubj(s){ misSubj=s; renderAll(); },
+  setStatus(s){ misStatus=s; renderAll(); },
+  search(v){ misQ=v.trim(); renderAll(); },
+  edit(id){
+    const m=id?Store.coll('mistakes').find(x=>x.id===id):{subject:'数学',title:'',question:'',answer:'',tags:'',note:'',images:[]};
+    window._misImgs=[...(m.images||[])];
+    openModal(`<h3>${id?'编辑':'添加'}错题</h3>
+      <div class="row"><div class="frow grow"><label>科目</label><select class="field" id="mf-subj">${MIS_SUBJ.map(s=>`<option ${m.subject===s?'selected':''}>${s}</option>`).join('')}</select></div>
+      <div class="frow" style="flex:2"><label>标题（一句话概括错因）</label><input class="field" id="mf-title" value="${esc(m.title)}" placeholder="如：极限定义理解偏差"></div></div>
+      <div class="frow"><label>题目（文字描述）</label><textarea class="field" id="mf-q" rows="4" placeholder="把题干抄在这里，或只写关键条件">${esc(m.question)}</textarea></div>
+      <div class="frow"><label>正确答案 / 解析</label><textarea class="field" id="mf-a" rows="3">${esc(m.answer)}</textarea></div>
+      <div class="frow"><label>我的错因（可选）</label><input class="field" id="mf-note" value="${esc(m.note)}" placeholder="当时怎么想的、为什么错"></div>
+      <div class="frow"><label>标签（逗号分隔，如：高数,极限）</label><input class="field" id="mf-tags" value="${esc(m.tags)}"></div>
+      <div class="frow"><label>题目图片（可多张，自动压缩存本地）</label>
+        <input class="field" type="file" accept="image/*" multiple onchange="Mis.addImg(this)">
+        <div class="img-preview-row" id="mf-imgs"></div></div>
+      <div class="fbtns">${id?`<button class="btn danger-ghost" onclick="Mis.del('${id}')">删除</button>`:''}<button class="btn ghost" onclick="closeModal()">取消</button><button class="btn" onclick="Mis.save('${id||''}')">保存</button></div>`);
+    renderImgPreview();
+  },
+  async addImg(input){
+    for(const f of input.files){
+      if(!f.type.startsWith('image/')) continue;
+      if(f.size>10*1024*1024){ toast(f.name+' 超过 10MB，已跳过'); continue; }
+      window._misImgs.push(await compressImage(f));
+    }
+    input.value=''; renderImgPreview();
+  },
+  delImg(i){ window._misImgs.splice(i,1); renderImgPreview(); },
+  save(id){
+    const v={ subject:$('#mf-subj').value, title:$('#mf-title').value.trim(), question:$('#mf-q').value.trim(),
+      answer:$('#mf-a').value.trim(), note:$('#mf-note').value.trim(), tags:$('#mf-tags').value.trim(), images:[...window._misImgs] };
+    if(!v.title && !v.question && !v.images.length) return alert('至少填写标题、题目或上传一张图片');
+    if(!v.title) v.title=v.question.slice(0,20)||'图片错题';
+    try{
+      if(id) API.data.update('mistakes',id,v);
+      else API.data.create('mistakes',{...v,status:'未掌握',reviewCount:0,lastReview:'',nextReview:todayStr(),aiAnalysis:'',createdAt:new Date().toISOString()});
+    }catch(e){ return alert('保存失败：图片可能过大导致本地存储超限，请减少图片数量或尺寸'); }
+    closeModal(); renderAll();
+  },
+  del(id){ if(confirm('删除这道错题？')){ API.data.remove('mistakes',id); closeModal(); renderAll(); } },
+  reviewOne(id){ const m=Store.coll('mistakes').find(x=>x.id===id); if(m){ rq=[m]; rIdx=0; rShow=false; misTab='review'; renderAll(); } },
+  flip(){ rShow=true; renderAll(); },
+  rate(g){
+    const m=rq[rIdx]; if(!m) return;
+    const t=todayStr();
+    const patch={ reviewCount:(m.reviewCount||0)+1, lastReview:t };
+    if(g==='again'){ patch.status='未掌握'; patch.nextReview=addDays(t,1); }
+    else if(g==='hard'){ patch.status='复习中'; patch.nextReview=addDays(t,3); }
+    else { patch.status=(m.reviewCount||0)>=1?'已掌握':'复习中'; patch.nextReview=addDays(t,7); }
+    API.data.update('mistakes',m.id,patch);
+    rShow=false; rIdx++;
+    if(rIdx>=rq.length){ toast('本轮复习完成'); misTab='list'; }
+    renderAll();
+  },
+  async ai(id){
+    const m=Store.coll('mistakes').find(x=>x.id===id); if(!m) return;
+    if(!API.ai.configured()){
+      const tags=m.tags?m.tags.split(/[,，]/).filter(Boolean):[];
+      const txt=`【本地分析模板 · 未接 AI】
+1. 考查知识点：${m.subject}${tags.length?' · '+tags.join(' / '):'（建议补充标签便于归类）'}
+2. 错误原因：${m.note||'未填写错因——建议回忆当时的思路写下来，比答案更重要'}
+3. 复习建议：今天、3 天后、7 天后各过一遍本题；再找 2 道同类题巩固
+4. 防再错口诀：把「错因」浓缩成一句话写在标题里，考前只看标题
+（配置 AI 接口后，此处由 DeepSeek 输出知识点拆解、同类题套路与记忆口诀）`;
+      API.data.update('mistakes',id,{aiAnalysis:txt}); renderAll(); return;
+    }
+    toast('AI 分析中…');
+    let out='';
+    try{
+      await API.ai.chat({ sessionId:'mistake-'+id,
+        messages:[{role:'user',content:`请分析这道考研错题，输出：1.考查知识点 2.错误原因诊断 3.同类题解题套路 4.一句话防再错口诀。\n科目：${m.subject}\n题目：${m.question||'（见图片，共'+(m.images||[]).length+'张）'}\n我的错因：${m.note||'未填写'}\n正确答案：${m.answer||'未填写'}`}],
+        context:buildContext(), onToken:tok=>out+=tok });
+      API.data.update('mistakes',id,{aiAnalysis:out});
+    }catch(e){ toast('AI 分析失败：'+e.message); }
+    renderAll();
+  },
+  aiAll(){
+    const ms=Store.coll('mistakes');
+    if(!ms.length) return alert('还没有错题，先添加几道吧');
+    const bySubj={}, byTag={}; let mastered=0;
+    ms.forEach(m=>{ bySubj[m.subject]=(bySubj[m.subject]||0)+1; if(m.status==='已掌握')mastered++;
+      (m.tags||'').split(/[,，]/).filter(Boolean).forEach(tg=>{ byTag[tg]=(byTag[tg]||0)+1; }); });
+    const topTags=Object.entries(byTag).sort((a,b)=>b[1]-a[1]).slice(0,5);
+    const due=misDue();
+    openModal(`<h3><i class="fa-solid fa-wand-magic-sparkles"></i> 错题总结 ${API.ai.configured()?'':'<span class="tag orange">本地统计 · 未接 AI</span>'}</h3>
+      <div class="frow"><label>总量与掌握</label><div>共 <b>${ms.length}</b> 道 · 已掌握 <b>${mastered}</b> 道（${ms.length?Math.round(mastered/ms.length*100):0}%） · 今日待复习 <b style="color:var(--danger)">${due.length}</b> 道</div></div>
+      <div class="frow"><label>科目分布</label>${Object.entries(bySubj).map(e=>`<div style="margin:6px 0"><div class="row" style="justify-content:space-between"><span>${e[0]}</span><b>${e[1]} 道</b></div><div class="progress-track"><div class="progress-fill" style="width:${e[1]/ms.length*100}%"></div></div></div>`).join('')}</div>
+      <div class="frow"><label>高频错因标签 TOP5</label>${topTags.length?'<div class="row">'+topTags.map(t=>`<span class="tag red">${esc(t[0])} × ${t[1]}</span>`).join('')+'</div>':'<div class="muted">暂无标签，添加错题时建议填写</div>'}</div>
+      <div class="frow"><label>复习建议</label><ul style="padding-left:18px;line-height:2">
+        ${due.length?`<li>先清掉今天到期的 ${due.length} 道（进入复习模式）</li>`:'<li>今日无到期错题，可主动添加新错题</li>'}
+        ${topTags.length?`<li>「${esc(topTags[0][0])}」出错最多，建议安排一次专题突破</li>`:''}
+        <li>每道题的「我的错因」比答案更重要，务必填写</li></ul></div>
+      <div class="muted">接入 AI 后可对每道题做知识点拆解（单题上的「AI 分析」按钮）。</div>
+      <div class="fbtns"><button class="btn" onclick="closeModal()">知道了</button></div>`);
+  }
+};
+function renderImgPreview(){
+  const el=$('#mf-imgs'); if(!el) return;
+  el.innerHTML=window._misImgs.map((src,i)=>`<div class="pwrap"><img src="${src}"><div class="pdel" onclick="Mis.delImg(${i})">✕</div></div>`).join('');
+}
+function renderMis(){
+  const ms=Store.coll('mistakes');
+  const due=misDue();
+  const mastN=ms.filter(m=>m.status==='已掌握').length;
+  let body='';
+  if(misTab==='review'){
+    const m=rq[rIdx];
+    body=`<div class="card" style="max-width:640px;margin:0 auto">
+      <h3><i class="fa-solid fa-rotate"></i> 复习模式 <span class="muted" style="margin-left:auto;font-weight:400">${rq.length?`第 ${Math.min(rIdx+1,rq.length)} / ${rq.length} 题`:'队列为空'}</span></h3>
+      ${m?`<div class="mis-review-card" onclick="if(!rShow)Mis.flip()">
+          <div class="row"><span class="tag" style="background:rgba(255,255,255,.2);color:#fff">${m.subject}</span><b>${esc(m.title)}</b></div>
+          <div class="mq">${esc(m.question)||'（图片题，见下图）'}</div>
+          ${(m.images||[]).map(src=>`<img src="${src}" onclick="event.stopPropagation()">`).join('')}
+          ${rShow?`<div class="ma"><i class="fa-solid fa-check"></i> ${esc(m.answer)||'（未填写答案）'}${m.note?`<div style="opacity:.85;margin-top:6px"><i class="fa-regular fa-comment-dots"></i> 我的错因：${esc(m.note)}</div>`:''}</div>`:'<div style="font-size:12px;opacity:.8">点击卡片查看答案</div>'}
+        </div>
+        ${rShow?`<div class="row mt" style="justify-content:center">
+          <button class="btn danger-ghost" onclick="Mis.rate('again')"><i class="fa-regular fa-face-frown"></i> 还不会（明天再来）</button>
+          <button class="btn ghost" onclick="Mis.rate('hard')"><i class="fa-regular fa-face-meh"></i> 模糊（3 天后）</button>
+          <button class="btn green" onclick="Mis.rate('good')"><i class="fa-regular fa-face-smile"></i> 掌握（7 天后）</button></div>`:''}`
+      :`<div class="muted" style="text-align:center;padding:40px 0"><i class="fa-solid fa-circle-check"></i> 今天没有到期错题<br><br><button class="btn" onclick="Mis.tab('list')">返回错题本</button></div>`}
+    </div>`;
+  }else{
+    let list=[...ms].sort((a,b)=>(a.nextReview||'').localeCompare(b.nextReview||''));
+    if(misSubj!=='全部') list=list.filter(m=>m.subject===misSubj);
+    if(misStatus!=='全部') list=list.filter(m=>m.status===misStatus);
+    if(misQ) list=list.filter(m=>(m.title+m.question+(m.tags||'')).toLowerCase().includes(misQ.toLowerCase()));
+    body=`<div class="stat-cards" style="margin-bottom:14px">
+      <div class="stat-card"><span class="muted">错题总数</span><div class="sv">${ms.length}</div></div>
+      <div class="stat-card"><span class="muted">今日待复习</span><div class="sv" style="color:var(--danger)">${due.length}</div></div>
+      <div class="stat-card"><span class="muted">掌握率</span><div class="sv" style="color:var(--accent)">${ms.length?Math.round(mastN/ms.length*100):0}%</div></div>
+    </div>
+    <div class="card">
+      <div class="row" style="margin-bottom:10px">
+        <div class="filter-tabs">${['全部',...MIS_SUBJ].map(s=>`<button class="${misSubj===s?'active':''}" onclick="Mis.setSubj('${s}')">${s}</button>`).join('')}</div>
+        <div class="filter-tabs">${['全部','未掌握','复习中','已掌握'].map(s=>`<button class="${misStatus===s?'active':''}" onclick="Mis.setStatus('${s}')">${s}</button>`).join('')}</div>
+        <input class="field" style="width:170px" placeholder="搜标题 / 题目 / 标签" value="${esc(misQ)}" oninput="Mis.search(this.value)">
+        <span class="grow"></span>
+        <button class="btn sm soft" onclick="Mis.aiAll()"><i class="fa-solid fa-wand-magic-sparkles"></i> AI 总结</button>
+        <button class="btn sm" onclick="Mis.edit()">＋ 添加错题</button>
+      </div>
+      ${list.map(m=>{ const isDue=m.status!=='已掌握'&&(m.nextReview||todayStr())<=todayStr(); return `
+      <div class="mis-item">
+        ${m.images&&m.images.length?`<img class="mis-thumb" src="${m.images[0]}" onclick="Mis.reviewOne('${m.id}')">`:`<div class="mis-noimg"><i class="fa-regular fa-image"></i></div>`}
+        <div class="grow">
+          <div class="row"><b>${esc(m.title)}</b><span class="tag cat">${m.subject}</span>
+            <span class="tag ${m.status==='已掌握'?'done':m.status==='复习中'?'orange':'red'}">${m.status}</span>
+            ${isDue?'<span class="tag red">今日到期</span>':''}</div>
+          <div class="muted" style="margin-top:4px">${m.tags?'<i class="fa-solid fa-tag"></i> '+esc(m.tags)+' · ':''}已复习 ${m.reviewCount||0} 次 · 下次复习 ${m.nextReview||'-'} · ${(m.images||[]).length} 张图</div>
+          ${m.aiAnalysis?`<details class="ai-analysis"><summary style="cursor:pointer;font-weight:600"><i class="fa-solid fa-wand-magic-sparkles"></i> AI 分析（点击展开）</summary>${esc(m.aiAnalysis)}</details>`:''}
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0">
+          <button class="btn sm green" onclick="Mis.reviewOne('${m.id}')">复习</button>
+          <button class="btn sm soft" onclick="Mis.ai('${m.id}')">AI 分析</button>
+          <button class="btn sm ghost" onclick="Mis.edit('${m.id}')">✎ 编辑</button>
+        </div>
+      </div>`;}).join('') || '<div class="muted" style="padding:24px;text-align:center">没有匹配的错题，点右上「添加错题」记录第一道吧</div>'}
+    </div>`;
+  }
+  $('#view').innerHTML = `<div class="section-title"><i class="fa-solid fa-circle-xmark"></i> 错题复习 <span class="grow"></span>
+    <div class="filter-tabs"><button class="${misTab==='list'?'active':''}" onclick="Mis.tab('list')">错题本</button><button class="${misTab==='review'?'active':''}" onclick="Mis.tab('review')">复习模式${due.length?`（${due.length}）`:''}</button></div>
+  </div>${body}`;
+}
+
+/* =========================================================
+ * 模块 5｜复盘笔记
+ * ========================================================= */
+let noteType='全部';
+const Notes = {
+  filter(t){ noteType=t; renderAll(); },
+  edit(id){
+    const n=id?Store.coll('notes').find(x=>x.id===id):{date:todayStr(),type:'日复盘',done:'',problem:'',improve:'',tomorrow:'',mood:'🙂'};
+    openModal(`<h3>${id?'编辑':'写'}复盘 <button class="btn sm soft" style="float:right" onclick="Notes.aiDraft('${id||''}')"><i class="fa-solid fa-wand-magic-sparkles"></i> 请 AI 生成草稿</button></h3>
+      <div class="row"><div class="frow grow"><label>日期</label><input class="field" type="date" id="nf-date" value="${n.date}"></div>
+      <div class="frow grow"><label>类型</label><select class="field" id="nf-type">${['日复盘','周复盘'].map(x=>`<option ${n.type===x?'selected':''}>${x}</option>`).join('')}</select></div>
+      <div class="frow grow"><label>心情</label><select class="field" id="nf-mood">${['😄','🙂','😐','😟','😤'].map(x=>`<option ${n.mood===x?'selected':''}>${x}</option>`).join('')}</select></div></div>
+      ${[['今日完成','done'],['问题与不足','problem'],['改进措施','improve'],['明日计划','tomorrow']].map(f=>`
+      <div class="frow"><label>${f[0]} <span class="muted" id="wc-${f[1]}"></span></label><textarea class="field" id="nf-${f[1]}" rows="3" oninput="document.querySelector('#wc-${f[1]}').textContent=this.value.length+' 字'">${esc(n[f[1]])}</textarea></div>`).join('')}
+      <div class="fbtns">${id?`<button class="btn danger-ghost" onclick="Notes.del('${id}')">删除</button>`:''}<button class="btn ghost" onclick="closeModal()">取消</button><button class="btn" onclick="Notes.save('${id||''}')">保存</button></div>`);
+  },
+  aiDraft(id){
+    const d=$('#nf-date').value||todayStr(), t=todayStr();
+    const done=Store.coll('todos').filter(x=>x.done&&x.doneAt&&x.doneAt.slice(0,10)===d&&!x.name.startsWith('历史任务')).map(x=>'· '+x.name).join('\n')||'（今日暂无完成记录）';
+    const log=Store.coll('wordLogs').find(x=>x.date===d);
+    const undone=Store.coll('todos').filter(x=>!x.done&&x.due<=t&&!x.name.startsWith('历史任务')).map(x=>'· '+x.name).join('\n')||'（无滚存任务）';
+    const behind=Store.coll('progress').filter(x=>x.status!=='已掌握'&&x.plan<t).map(x=>'· '+x.name+'（'+x.pct+'%）').join('\n');
+    const fill=(k,v)=>{ const el=$('#nf-'+k); if(el){el.value=v; el.dispatchEvent(new Event('input'));} };
+    fill('done', done + (log?`\n· 单词 ${log.done}/${log.target} 词${log.checked?'（已打卡）':''}`:''));
+    fill('problem', behind? '进度落后项：\n'+behind : '（待补充）');
+    fill('improve','（待补充：针对上面的问题写 1-2 条可执行措施）');
+    fill('tomorrow', undone);
+    if(!API.ai.configured()) toast('当前为本地模板生成；配置 AI 接口后内容由 qwen-plus 生成');
+  },
+  save(id){ const v={date:$('#nf-date').value,type:$('#nf-type').value,mood:$('#nf-mood').value,done:$('#nf-done').value,problem:$('#nf-problem').value,improve:$('#nf-improve').value,tomorrow:$('#nf-tomorrow').value};
+    if(id) API.data.update('notes',id,v); else API.data.create('notes',{...v,createdAt:new Date().toISOString()});
+    closeModal(); renderAll(); },
+  del(id){ if(confirm('删除这条复盘？')){API.data.remove('notes',id);closeModal();renderAll();} }
+};
+function renderNotes(){
+  let list=[...Store.coll('notes')].sort((a,b)=>b.date.localeCompare(a.date));
+  if(noteType!=='全部') list=list.filter(x=>x.type===noteType);
+  $('#view').innerHTML = `<div class="section-title"><i class="fa-solid fa-pen-to-square"></i> 复盘笔记 <span class="grow"></span>
+    <div class="filter-tabs">${['全部','日复盘','周复盘'].map(x=>`<button class="${noteType===x?'active':''}" onclick="Notes.filter('${x}')">${x}</button>`).join('')}</div>
+    <button class="btn sm" onclick="Notes.edit()">＋ 写复盘</button></div>
+  <div class="card">${list.map(n=>`<div class="note-item" onclick="Notes.edit('${n.id}')">
+      <div class="row"><span class="n-title" style="font-weight:700">${n.date}</span><span class="tag cat">${n.type}</span><span>${n.mood||''}</span><span class="muted" style="margin-left:auto">${(n.done+n.problem+n.improve+n.tomorrow).length} 字</span></div>
+      <div class="muted" style="margin-top:6px;white-space:pre-wrap"><i class="fa-solid fa-check"></i> ${esc(n.done).slice(0,80)}${n.done.length>80?'…':''}</div>
+    </div>`).join('') || '<div class="muted" style="padding:20px;text-align:center">还没有复盘，点右上「写复盘」开始</div>'}
+  </div>`;
+}
+
+/* =========================================================
+ * 模块 6｜数据总览
+ * ========================================================= */
+let trendDays=7;
+const Dash = {
+  days(d){ trendDays=d; renderAll(); },
+  aiAnalyze(){
+    const t=todayStr();
+    const todos=Store.coll('todos').filter(x=>!x.name.startsWith('历史任务'));
+    const overdue=todos.filter(x=>!x.done&&x.due<t);
+    const behind=Store.coll('progress').filter(x=>x.status!=='已掌握'&&x.plan<t);
+    const streak=wordStreak();
+    const summary=`本周单词 ${(function(){const[a,b]=weekRange();return Store.coll('wordLogs').filter(x=>x.date>=a&&x.date<=b).reduce((s,x)=>s+x.done,0);})()} 词，连续打卡 ${streak} 天；总体进度 ${Math.round((subjAvg('数学')+subjAvg('英语')+subjAvg('政治'))/3)}%。`;
+    const issues=[...overdue.map(x=>'逾期待办：'+x.name), ...behind.map(x=>'进度落后：'+x.name+'（'+x.subject+' '+x.pct+'%）')];
+    const sugg=[overdue.length?'优先清理逾期待办，把大任务拆成 25 分钟小块':'保持当前节奏', behind.length?'为「'+behind[0].name+'」安排今晚 1 小时专项':'按计划推进', streak<3?'单词连续打卡偏少，建议固定早晨时段':'单词节奏不错，继续保持'];
+    openModal(`<h3><i class="fa-solid fa-wand-magic-sparkles"></i> AI 数据解读 ${API.ai.configured()?'':'<span class="tag orange">本地生成 · 未接 AI</span>'}</h3>
+      <div class="frow"><label>总结</label><div>${esc(summary)}</div></div>
+      <div class="frow"><label>问题</label>${issues.length?'<ul style="padding-left:18px;line-height:2">'+issues.map(i=>'<li>'+esc(i)+'</li>').join('')+'</ul>':'<div class="muted">暂无突出问题</div>'}</div>
+      <div class="frow"><label>建议</label><ul style="padding-left:18px;line-height:2">${sugg.map(s=>'<li>'+esc(s)+'</li>').join('')}</ul></div>
+      <div class="muted">接入阿里云百炼 qwen-plus 后，此处由 POST /api/ai/analyze 返回结构化建议。</div>
+      <div class="fbtns"><button class="btn" onclick="closeModal()">知道了</button></div>`);
+  }
+};
+function lineChartSVG(pairs,{w=520,h=180}={}){
+  const max=Math.max(1,...pairs.map(p=>p[1])); const step=w/(pairs.length-1||1);
+  const pts=pairs.map((p,i)=>[i*step, h-28-(h-48)*p[1]/max]);
+  const path=pts.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ');
+  return `<svg viewBox="0 0 ${w} ${h}" style="width:100%">
+    <path d="${path}" fill="none" stroke="var(--vivid)" stroke-width="2.5" stroke-linejoin="round"/>
+    ${pts.map((p,i)=>`<circle cx="${p[0]}" cy="${p[1]}" r="3.5" fill="var(--vivid)"><title>${pairs[i][0]}：${pairs[i][1]} 个</title></circle>${i%Math.ceil(pairs.length/7)===0?`<text x="${p[0]}" y="${h-8}" text-anchor="middle" font-size="9" fill="var(--muted)">${pairs[i][0].slice(5)}</text>`:''}`).join('')}
+  </svg>`;
+}
+function donutSVG(obj){
+  const entries=Object.entries(obj).filter(e=>e[1]>0); const total=entries.reduce((s,e)=>s+e[1],0)||1;
+  const colors=['#0a84ff','#5e5ce6','#64d2ff','#30b0c7','#8e8e93'];
+  const r=54,c=2*Math.PI*r; let acc=0, segs='';
+  entries.forEach((e,i)=>{ const frac=e[1]/total;
+    segs+=`<circle cx="70" cy="70" r="${r}" fill="none" stroke="${colors[i%5]}" stroke-width="20" stroke-dasharray="${(frac*c).toFixed(1)} ${c.toFixed(1)}" stroke-dashoffset="${(-acc*c).toFixed(1)}" transform="rotate(-90 70 70)"/>`; acc+=frac; });
+  return `<div class="row"><svg width="140" height="140" viewBox="0 0 140 140">${segs}<text x="70" y="75" text-anchor="middle" font-size="15" font-weight="800" fill="var(--ink)">${Math.round(total/60*10)/10}h</text></svg>
+  <div>${entries.map((e,i)=>`<div class="row" style="gap:6px;margin-bottom:5px"><span style="width:10px;height:10px;border-radius:3px;background:${colors[i%5]}"></span><span class="muted">${e[0]}</span><b>${e[1]}min</b></div>`).join('')}</div></div>`;
+}
+function renderDash(){
+  const t=todayStr();
+  const todos=Store.coll('todos').filter(x=>!x.name.startsWith('历史任务'));
+  const todayAll=todos.filter(x=>x.due<=t), doneR=todayAll.length?Math.round(todayAll.filter(x=>x.done).length/todayAll.length*100):100;
+  const overall=Math.round((subjAvg('数学')+subjAvg('英语')+subjAvg('政治'))/3);
+  const [wm,ws]=weekRange();
+  const weekMin=Store.coll('wordLogs').filter(x=>x.date>=wm&&x.date<=ws).reduce((s,x)=>s+(x.minutes||0),0)+Store.data.meta.studyMinutes['其他'];
+  const trend=[...Array(trendDays)].map((_,i)=>{ const d=addDays(t,-(trendDays-1-i)); return [d, Store.coll('todos').filter(x=>x.done&&x.doneAt&&x.doneAt.slice(0,10)===d).length]; });
+  $('#view').innerHTML = `<div class="section-title"><i class="fa-solid fa-chart-pie"></i> 数据总览 <span class="grow"></span><button class="btn sm soft" onclick="Dash.aiAnalyze()"><i class="fa-solid fa-wand-magic-sparkles"></i> 让 AI 解读</button></div>
+  <div class="stat-cards">
+    <div class="stat-card"><span class="muted">今日任务完成率</span><div class="sv" style="color:var(--primary)">${doneR}%</div><span class="muted">${todayAll.filter(x=>x.done).length}/${todayAll.length} 项</span></div>
+    <div class="stat-card"><span class="muted">连续打卡天数</span><div class="sv" style="color:var(--danger)">${wordStreak()} 天</div><span class="muted">单词打卡</span></div>
+    <div class="stat-card"><span class="muted">本周学习时长</span><div class="sv" style="color:var(--accent)">${Math.round(weekMin/60*10)/10} h</div><span class="muted">含单词 + 任务折算</span></div>
+    <div class="stat-card"><span class="muted">考研总进度</span><div class="sv">${overall}%</span><span class="muted">数 / 英 / 政平均</span></div>
+  </div>
+  <div class="chart-grid">
+    <div class="card"><h3>任务完成趋势 <span class="grow"></span><div class="filter-tabs"><button class="${trendDays===7?'active':''}" onclick="Dash.days(7)">近 7 天</button><button class="${trendDays===30?'active':''}" onclick="Dash.days(30)">近 30 天</button></div></h3>${lineChartSVG(trend)}</div>
+    <div class="card"><h3>单词打卡热力图（近 12 周）</h3>${heatSVG(84)}</div>
+    <div class="card"><h3>三科进度对比</h3>${['数学','英语','政治'].map(s=>`<div style="margin:14px 0"><div class="row" style="justify-content:space-between"><span>${s}</span><b>${Math.round(subjAvg(s))}%</b></div><div class="progress-track" style="height:14px"><div class="progress-fill" style="width:${subjAvg(s)}%"></div></div></div>`).join('')}</div>
+    <div class="card"><h3>时间分配</h3>${donutSVG(Store.data.meta.studyMinutes)}</div>
+  </div>`;
+}
+
+/* =========================================================
+ * 模块 7｜DDL 倒计时
+ * ========================================================= */
+let ddlView='list', calMonth=todayStr().slice(0,7);
+function ddlTier(due){
+  const r=dayDiff(due,todayStr());
+  if(r<0) return {k:'over',tag:'已过期',cls:'red',r};
+  if(r<=3) return {k:'urgent',tag:'紧急',cls:'red',r};
+  if(r<=7) return {k:'near',tag:'临近',cls:'orange',r};
+  if(r<=30) return {k:'watch',tag:'关注',cls:'cat',r};
+  return {k:'far',tag:'远期',cls:'gray',r};
+}
+const Ddl = {
+  view(v){ ddlView=v; renderAll(); },
+  month(d){ const [y,m]=calMonth.split('-').map(Number); const dt=new Date(y,m-1+d,1); calMonth=dt.getFullYear()+'-'+p2(dt.getMonth()+1); renderAll(); },
+  toTodo(id){ const x=Store.coll('ddls').find(d=>d.id===id);
+    API.data.create('todos',{name:x.name,priority:'P0',cat:x.type==='考试'?'学习':'其他',due:x.due<=todayStr()?todayStr():x.due,done:false,note:'来自 DDL：'+x.type,createdAt:todayStr()});
+    toast('已转为待办'); renderAll(); },
+  toggle(id){ const x=Store.coll('ddls').find(d=>d.id===id); API.data.update('ddls',id,{done:!x.done}); renderAll(); },
+  edit(id){
+    const c=id?Store.coll('ddls').find(x=>x.id===id):{name:'',type:'考试',due:todayStr(),note:''};
+    openModal(`<h3>${id?'编辑':'新增'}DDL</h3>
+      <div class="frow"><label>事项名</label><input class="field" id="df-name" value="${esc(c.name)}"></div>
+      <div class="row"><div class="frow grow"><label>类型</label><select class="field" id="df-type">${['考试','作业','竞赛','报名','其他'].map(x=>`<option ${c.type===x?'selected':''}>${x}</option>`).join('')}</select></div>
+      <div class="frow grow"><label>截止日期</label><input class="field" type="date" id="df-due" value="${c.due}"></div></div>
+      <div class="frow"><label>备注</label><input class="field" id="df-note" value="${esc(c.note)}"></div>
+      <div class="fbtns">${id?`<button class="btn danger-ghost" onclick="Ddl.del('${id}')">删除</button>`:''}<button class="btn ghost" onclick="closeModal()">取消</button><button class="btn" onclick="Ddl.save('${id||''}')">保存</button></div>`);
+  },
+  save(id){ const v={name:$('#df-name').value.trim(),type:$('#df-type').value,due:$('#df-due').value,note:$('#df-note').value.trim()};
+    if(!v.name||!v.due) return alert('请填写完整');
+    if(id) API.data.update('ddls',id,v); else API.data.create('ddls',{...v,done:false});
+    closeModal(); renderAll(); },
+  del(id){ if(confirm('删除该 DDL？')){API.data.remove('ddls',id);closeModal();renderAll();} }
+};
+function renderDdl(){
+  const list=[...Store.coll('ddls')].sort((a,b)=> a.done-b.done || dayDiff(a.due,todayStr())-dayDiff(b.due,todayStr()));
+  let body='';
+  if(ddlView==='list'){
+    body=`<div class="card">${list.map(x=>{ const tr=ddlTier(x.due); return `
+      <div class="ddl-item" style="${x.done?'opacity:.5':''}">
+        <div class="ddl-days" style="color:${tr.k==='over'||tr.k==='urgent'?'var(--danger)':tr.k==='near'?'var(--warn)':'var(--ink)'}">${x.done?'✓':(tr.r<0? Math.abs(tr.r)+'天前': tr.r+'天')}</div>
+        <div class="grow"><b style="${x.done?'text-decoration:line-through':''}">${esc(x.name)}</b>
+          <div class="muted">${x.due} 截止${x.note?' · '+esc(x.note):''}</div></div>
+        <div class="ddl-acts">
+        <span class="tag cat">${x.type}</span><span class="tag ${tr.cls}">${tr.tag}</span>
+        <button class="btn sm ghost" onclick="Ddl.toTodo('${x.id}')">转为待办</button>
+        <button class="btn sm ghost" onclick="Ddl.edit('${x.id}')">✎</button>
+        <button class="btn sm ${x.done?'ghost':'green'}" onclick="Ddl.toggle('${x.id}')">${x.done?'恢复':'完成'}</button>
+        </div>
+      </div>`;}).join('')}</div>`;
+  }else{
+    const [y,m]=calMonth.split('-').map(Number);
+    const first=new Date(y,m-1,1); let startDow=first.getDay()||7;
+    const daysIn=new Date(y,m,0).getDate();
+    let cells='';
+    for(let i=1;i<startDow;i++) cells+='<td></td>';
+    for(let d=1;d<=daysIn;d++){
+      const ds=calMonth+'-'+p2(d);
+      const evs=Store.coll('ddls').filter(x=>x.due===ds);
+      cells+=`<td class="${ds===todayStr()?'today-cell':''}"><span class="d">${d}</span>${evs.map(x=>{const tr=ddlTier(x.due);return `<span class="ev" style="background:var(--${tr.cls==='red'?'danger':tr.cls==='orange'?'warn':'primary'}-soft, #eef0fe);color:var(--${tr.cls==='red'?'danger':tr.cls==='orange'?'warn':'primary'})" onclick="Ddl.edit('${x.id}')">${esc(x.name)}</span>`;}).join('')}</td>`;
+      if((startDow-1+d)%7===0) cells+='</tr><tr>';
+    }
+    body=`<div class="card" style="overflow-x:auto"><div class="row" style="margin-bottom:10px">
+      <button class="btn ghost sm" onclick="Ddl.month(-1)">‹</button><b>${calMonth}</b><button class="btn ghost sm" onclick="Ddl.month(1)">›</button></div>
+      <table class="cal"><tr>${['一','二','三','四','五','六','日'].map(d=>`<th>${d}</th>`).join('')}</tr><tr>${cells}</tr></table></div>`;
+  }
+  $('#view').innerHTML = `<div class="section-title"><i class="fa-solid fa-hourglass-half"></i> DDL 倒计时 <span class="grow"></span>
+    <div class="filter-tabs"><button class="${ddlView==='list'?'active':''}" onclick="Ddl.view('list')">列表</button><button class="${ddlView==='cal'?'active':''}" onclick="Ddl.view('cal')">日历</button></div>
+    <button class="btn sm" onclick="Ddl.edit()">＋ 新增 DDL</button></div>
+    <div class="muted" style="margin-bottom:10px">剩余 ≤3 天自动进入「今天要处理」；&lt;0 天深红置顶，4–7 天橙色，8–30 天常规，&gt;30 天灰色。</div>${body}`;
+}
+
+/* =========================================================
+ * 模块 8｜AI 学习助手
+ * ========================================================= */
+const AI = {
+  open(){ renderDrawer(); $('#aiDrawer').classList.add('open'); },
+  close(){ $('#aiDrawer').classList.remove('open'); },
+  cur(){ let s=Store.coll('chatSessions'); if(!s.length){ s.push({id:uid(),title:'新会话',msgs:[],updatedAt:new Date().toISOString()}); Store.save(); } return Store.coll('chatSessions')[0]; },
+  newSess(){ Store.coll('chatSessions').unshift({id:uid(),title:'新会话',msgs:[],updatedAt:new Date().toISOString()}); Store.save(); renderDrawer(); },
+  pick(id){ const s=Store.coll('chatSessions'); const i=s.findIndex(x=>x.id===id); if(i>0){ s.unshift(s.splice(i,1)[0]); Store.save(); } renderDrawer(); },
+  clear(){ if(confirm('清空当前会话？')){ const s=this.cur(); s.msgs=[]; s.updatedAt=new Date().toISOString(); Store.save(); renderDrawer(); } },
+  configUI(){
+    openModal(`<h3>配置 AI 接口</h3>
+      <div class="muted" style="margin-bottom:12px;line-height:1.8">填入阿里云自建后端地址后，对话将调用 <code>POST ${API_CONFIG.aiChatPath}</code>（SSE 流式）。<b><i class="fa-solid fa-triangle-exclamation"></i> 风险提示：Key 仅存 localStorage，正式环境请把 DASHSCOPE_API_KEY 放服务端环境变量（安全红线 4.7）。</b></div>
+      <div class="frow"><label>baseUrl（如 https://api.你的域名.com）</label><input class="field" id="cfg-url" value="${esc(API_CONFIG.baseUrl)}"></div>
+      <div class="frow"><label>Token / Key（可选，本机调试）</label><input class="field" id="cfg-key" value="${esc(API_CONFIG._key||'')}"></div>
+      <div class="fbtns"><button class="btn danger-ghost" onclick="AI.clearCfg()">清除配置</button><button class="btn ghost" onclick="closeModal()">取消</button><button class="btn" onclick="AI.saveCfg()">保存</button></div>`);
+  },
+  saveCfg(){ localStorage.setItem('ytwb_cfg',JSON.stringify({baseUrl:$('#cfg-url').value.trim(),apiKey:$('#cfg-key').value.trim()})); closeModal(); toast('已保存，刷新页面生效'); },
+  clearCfg(){ localStorage.removeItem('ytwb_cfg'); closeModal(); toast('已清除，刷新页面生效'); },
+  quick(q){ $('#ai-input').value=q; this.send(); },
+  async send(){
+    const inp=$('#ai-input'), text=inp.value.trim(); if(!text) return;
+    inp.value='';
+    const sess=this.cur();
+    sess.msgs.push({role:'user',text,ts:Date.now()}); sess.updatedAt=new Date().toISOString();
+    if(sess.title==='新会话') sess.title=text.slice(0,12);
+    Store.save(); renderDrawer(); scrollMsgs();
+    const botMsg={role:'bot',text:'',ts:Date.now(),local:false}; sess.msgs.push(botMsg); Store.save(); renderDrawer(); scrollMsgs();
+    const local=localAnswer(text);
+    try{
+      if(local!==null){ botMsg.text=local.text; botMsg.local=true; if(local.action) botMsg.action=local.action; renderDrawer(); scrollMsgs(); }
+      else if(!API.ai.configured()){ botMsg.text=guideText(); botMsg.local=true; renderDrawer(); scrollMsgs(); }
+      else{
+        await API.ai.chat({sessionId:sess.id, messages:sess.msgs.filter(m=>!m.local).map(m=>({role:m.role==='bot'?'assistant':'user',content:m.text})), context:buildContext(),
+          onToken:tok=>{ botMsg.text+=tok; const el=$('#msg-'+botMsg.ts); if(el){el.textContent=botMsg.text; scrollMsgs();} }});
+      }
+    }catch(e){ botMsg.text = e.code==='AI_NOT_CONFIGURED'? guideText() : '⚠️ 请求失败：'+e.message+'（已自动降级，可重试或检查接口配置）'; }
+    sess.updatedAt=new Date().toISOString(); Store.save(); renderDrawer(); scrollMsgs();
+  }
+};
+function guideText(){ return 'AI 接口尚未配置。\n\n当前可以用「快捷指令」问我本周单词、待办、逾期、计划等问题（本地即时计算）。\n\n要启用完整 AI 对话（qwen-plus）：\n1. 点下方「⚙️ 配置接口」填入阿里云后端 baseUrl\n2. 后端用 DASHSCOPE_API_KEY 调百炼（Key 只放服务端）\n3. 接口契约见需求文档 4.5 节'; }
+function buildContext(){
+  const t=todayStr();
+  return JSON.stringify({
+    date:t, examCountdown:dayDiff(examDate(),t),
+    todos:Store.coll('todos').filter(x=>!x.name.startsWith('历史任务')).map(x=>({n:x.name,p:x.priority,due:x.due,done:x.done})),
+    todayCourses:todayCourses().map(c=>({n:c.name,s:c.secStart,place:c.place})),
+    word:{today:Store.coll('wordLogs').find(x=>x.date===t)||null, streak:wordStreak(), target:Store.data.meta.wordTarget},
+    progress:Store.coll('progress').map(x=>({s:x.subject,n:x.name,pct:x.pct,plan:x.plan,st:x.status})),
+    ddls:Store.coll('ddls').filter(x=>!x.done).map(x=>({n:x.name,due:x.due,left:dayDiff(x.due,t)}))
+  });
+}
+function localAnswer(q){
+  const t=todayStr();
+  if(/单词|背.*多少/.test(q)){
+    const [a,b]=weekRange(); const logs=Store.coll('wordLogs').filter(x=>x.date>=a&&x.date<=b);
+    const sum=logs.reduce((s,x)=>s+x.done,0); const today=Store.coll('wordLogs').find(x=>x.date===t);
+    return {text:`📖 本周（${a} ~ ${b}）你共背了 ${sum} 个单词。\n今天：${today?today.done:0}/${Store.data.meta.wordTarget}，${today&&today.checked?'已打卡 ✅':'还没打卡哦，别忘了！'}\n连续打卡 ${wordStreak()} 天 🔥`};
+  }
+  if(/没做|未完成|还有什么|今天的待办/.test(q)){
+    const l=Store.coll('todos').filter(x=>!x.done&&x.due<=t&&!x.name.startsWith('历史任务'));
+    return {text: l.length? '📋 今天还没完成的：\n'+l.map(x=>`· ${x.name}（${x.priority}，${x.due<t?'已逾期':'今天截止'}）`).join('\n') : '🎉 今天的任务全部完成了，可以休息一下或预习明天的内容！'};
+  }
+  if(/逾期/.test(q)){
+    const l=Store.coll('todos').filter(x=>!x.done&&x.due<t&&!x.name.startsWith('历史任务'));
+    return {text: l.length? '🚨 逾期的任务：\n'+l.map(x=>`· ${x.name}（原定 ${x.due}）`).join('\n')+'\n\n建议：现在就挑 1 件用 25 分钟番茄钟处理掉。' : '✅ 没有逾期任务，保持住！'};
+  }
+  if(/重排|计划|落后/.test(q)){
+    const behind=Store.coll('progress').filter(x=>x.status!=='已掌握'&&x.plan<t);
+    const low=Store.coll('progress').filter(x=>x.status==='进行中').sort((a,b)=>a.pct-b.pct).slice(0,3);
+    return {text:`🗓️ 本周计划建议（基于当前进度）：\n${behind.length?'① 先补落后项：'+behind.map(x=>x.name).join('、')+'，每天安排 1 小时专项\n':''}② 推进进行中条目：${low.map(x=>`${x.name}（${x.pct}%→${Math.min(100,x.pct+20)}%）`).join('，')||'无'}\n③ 每天保底：单词 ${Store.data.meta.wordTarget} 个 + 1 篇英语阅读\n\n接入 AI 后可调用 POST /api/ai/plan 生成更细的逐日排程。`};
+  }
+  if(/复盘/.test(q)){
+    return {text:'📝 我可以根据今日数据生成复盘草稿并回填到「复盘笔记」。', action:{label:'生成并回填',fn:'aiFillReview'}};
+  }
+  return null;
+}
+window.aiFillReview = () => { AI.close(); go('notes'); setTimeout(()=>{ Notes.edit(); setTimeout(()=>Notes.aiDraft(''),50); },50); };
+function scrollMsgs(){ const m=$('#aiMsgs'); if(m) m.scrollTop=m.scrollHeight; }
+function renderDrawer(){
+  const sess=AI.cur();
+  $('#aiDrawer').innerHTML = `
+    <div class="ai-head"><span class="t"><i class="fa-solid fa-wand-magic-sparkles"></i> AI 学习助手</span><span class="grow"></span>
+      <button class="btn sm ghost" onclick="AI.configUI()">⚙️ 配置接口</button>
+      <button class="btn sm ghost" onclick="AI.newSess()">＋ 新会话</button>
+      <button class="btn sm danger-ghost" onclick="AI.clear()">清空</button>
+      <button class="btn sm ghost" onclick="AI.close()">✕</button></div>
+    ${API.ai.configured()?'':'<div class="ai-guide"><i class="fa-solid fa-plug"></i> 未配置 AI 接口，当前为<b>引导态</b>：快捷指令仍可本地即时回答。配置阿里云后端（百炼 qwen-plus）后解锁完整对话、SSE 流式输出与云端会话同步。</div>'}
+    <div class="ai-sessions">${Store.coll('chatSessions').map(s=>`<button class="sess ${s.id===sess.id?'active':''}" onclick="AI.pick('${s.id}')">${esc(s.title)}</button>`).join('')}</div>
+    <div id="aiMsgs">${sess.msgs.map(m=>`<div class="msg ${m.role==='user'?'user':'bot'+(m.local?' local-tag':'')}" ${m.role==='bot'?`id="msg-${m.ts}"`:''}>${esc(m.text)}${m.action?`<div style="margin-top:8px"><button class="btn sm green" onclick="${m.action.fn}()">${m.action.label}</button></div>`:''}</div>`).join('') || '<div class="muted" style="text-align:center;margin-top:30px">试试下面的快捷指令</div>'}</div>
+    <div class="quick-cmds">
+      <button onclick="AI.quick('我这周背了多少单词？')"><i class="fa-solid fa-book-open"></i> 问我数据</button>
+      <button onclick="AI.quick('今天还有什么没做？')"><i class="fa-solid fa-list-check"></i> 查待办</button>
+      <button onclick="AI.quick('数学进度落后了，帮我重排这周计划')"><i class="fa-solid fa-lightbulb"></i> 出建议</button>
+      <button onclick="AI.quick('根据今日数据生成复盘草稿')"><i class="fa-solid fa-pen-to-square"></i> 写复盘</button>
+    </div>
+    <div class="ai-input"><input class="field" id="ai-input" placeholder="输入问题，回车发送…" onkeydown="if(event.key==='Enter')AI.send()"><button class="btn" onclick="AI.send()">发送</button></div>`;
+}
+
+/* ---------- 小提示 ---------- */
+function toast(msg){
+  const d=document.createElement('div');
+  d.style.cssText='position:fixed;top:70px;left:50%;transform:translateX(-50%);background:#1f2430;color:#fff;padding:10px 18px;border-radius:10px;z-index:99;font-size:13px;box-shadow:0 6px 20px rgba(0,0,0,.25)';
+  d.textContent=msg; document.body.appendChild(d); setTimeout(()=>d.remove(),2200);
+}
+
+/* ---------- 主渲染 ---------- */
+function renderAll(){
+  renderTopbar(); renderPinned();
+  ({home:renderHome, todos:renderTodos, courses:renderCourses, words:renderWords, progress:renderProgress, mistakes:renderMis, notes:renderNotes, dash:renderDash, ddls:renderDdl})[curModule]();
+}
+/* ---------- 粒子背景（缓慢漂浮灰点 + 鼠标视差） ---------- */
+(function initParticles(){
+  const cv=document.getElementById('particles'); if(!cv) return;
+  const ctx=cv.getContext('2d');
+  let W,H,pts=[],mx=0,my=0;
+  function resize(){ W=cv.width=innerWidth; H=cv.height=innerHeight; }
+  resize(); addEventListener('resize',resize);
+  const N=Math.min(70,Math.max(30,Math.floor(innerWidth/22)));
+  for(let i=0;i<N;i++) pts.push({x:Math.random()*innerWidth,y:Math.random()*innerHeight,r:1+Math.random()*2.2,vx:(Math.random()-.5)*.22,vy:(Math.random()-.5)*.22,o:.04+Math.random()*.09,d:Math.random()*Math.PI*2});
+  addEventListener('mousemove',e=>{ mx=e.clientX/W-.5; my=e.clientY/H-.5; });
+  (function tick(){
+    ctx.clearRect(0,0,W,H);
+    for(const p of pts){
+      p.x+=p.vx; p.y+=p.vy; p.d+=.012;
+      if(p.x<-10)p.x=W+10; if(p.x>W+10)p.x=-10; if(p.y<-10)p.y=H+10; if(p.y>H+10)p.y=-10;
+      ctx.beginPath();
+      ctx.arc(p.x+mx*22*p.r, p.y+my*22*p.r, Math.max(.4,p.r+Math.sin(p.d)*.4), 0, Math.PI*2);
+      ctx.fillStyle='rgba(29,29,31,'+p.o+')'; ctx.fill();
+    }
+    requestAnimationFrame(tick);
+  })();
+})();
+Store.load();
+renderNav(); renderAll();
+if(API_CONFIG.mode==='custom'){ API.data.sync().then(()=>renderAll()); }
+setInterval(()=>{ renderTopbar(); if(curModule==='courses') renderCourses(); }, 60000);
+setInterval(()=>{ if(API_CONFIG.mode==='custom') API.data.sync(); }, 10000);
+document.addEventListener('visibilitychange', ()=>{ if(!document.hidden && API_CONFIG.mode==='custom') API.data.sync(); });
+</script>
+</body>
+</html>

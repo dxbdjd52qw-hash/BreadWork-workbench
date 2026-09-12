@@ -1,0 +1,18 @@
+# 密钥与环境（红线：永远不要提交）
+.env
+*.env
+!.env.example
+
+# 数据库与运行产物
+*.db
+*.sqlite
+venv/
+__pycache__/
+*.pyc
+
+# 部署包（走 GitHub Releases，不进仓库）
+*.zip
+
+# 系统垃圾
+.DS_Store
+Thumbs.db
