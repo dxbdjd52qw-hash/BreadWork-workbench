@@ -577,7 +577,21 @@ function renderNav(){
   $('#navList').innerHTML = MODULES.map(m=>`<button class="nav-btn ${curModule===m.id?'active':''}" onclick="go('${m.id}')"><span class="ic">${m.icon}</span>${m.name}</button>`).join('');
   $('#tabbar').innerHTML = MODULES.map(m=>`<button class="${curModule===m.id?'active':''}" onclick="go('${m.id}')"><span class="ic">${m.icon}</span>${m.name.replace('今日','').replace('我的','').replace('DDL 倒计时','DDL')}</button>`).join('');
 }
-function go(m){ curModule=m; renderNav(); renderAll(); window.scrollTo({top:0}); }
+/* ---------- 路由：地址栏 hash 持久化（刷新/前进后退都停在当前位置） ---------- */
+function routeSub(){ return curModule==='words' ? wordTab : curModule==='mistakes' ? misTab : curModule==='ddls' ? ddlView : ''; }
+function setHash(){ const h = '#' + curModule + (routeSub() ? '/' + routeSub() : ''); if(location.hash !== h) history.replaceState(null, '', h); }
+function applyRoute(){
+  const seg = decodeURIComponent((location.hash || '').replace(/^#/, '')).split('/');
+  const m = seg[0], sub = seg[1];
+  curModule = (m && MODULES.some(function(x){ return x.id === m; })) ? m : 'home';
+  if(sub){
+    if(curModule==='words'    && ['checkin','books','recite'].indexOf(sub) >= 0) wordTab  = sub;
+    if(curModule==='mistakes' && ['list','review'].indexOf(sub) >= 0)            misTab   = sub;
+    if(curModule==='ddls'     && ['list','cal'].indexOf(sub) >= 0)               ddlView  = sub;
+  }
+}
+window.addEventListener('hashchange', function(){ applyRoute(); renderNav(); renderAll(); });
+function go(m){ curModule=m; setHash(); renderNav(); renderAll(); window.scrollTo({top:0}); }
 
 function renderTopbar(){
   const d = dayDiff(examDate(), todayStr());
@@ -860,7 +874,7 @@ function renderCourses(){
  * ========================================================= */
 let wordBookId = null, wordTab='checkin', reciteIdx=0, reciteShow=false;
 const Words = {
-  tab(t){ wordTab=t; reciteIdx=0; reciteShow=false; renderAll(); },
+  tab(t){ wordTab=t; reciteIdx=0; reciteShow=false; setHash(); renderAll(); },
   pickBook(id){ wordBookId=id; renderAll(); },
   checkin(){
     const t=todayStr(); let log=Store.coll('wordLogs').find(x=>x.date===t);
@@ -1086,7 +1100,7 @@ let rq=[], rIdx=0, rShow=false;
 const MIS_SUBJ=['数学','英语','政治','其他'];
 function misDue(){ const t=todayStr(); return Store.coll('mistakes').filter(m=>m.status!=='已掌握' && (m.nextReview||t)<=t); }
 const Mis = {
-  tab(t2){ misTab=t2; if(t2==='review'){ rq=misDue(); rIdx=0; rShow=false; } renderAll(); },
+  tab(t2){ misTab=t2; if(t2==='review'){ rq=misDue(); rIdx=0; rShow=false; } setHash(); renderAll(); },
   setSubj(s){ misSubj=s; renderAll(); },
   setStatus(s){ misStatus=s; renderAll(); },
   search(v){ misQ=v.trim(); renderAll(); },
@@ -1374,7 +1388,7 @@ function ddlTier(due){
   return {k:'far',tag:'远期',cls:'gray',r};
 }
 const Ddl = {
-  view(v){ ddlView=v; renderAll(); },
+  view(v){ ddlView=v; setHash(); renderAll(); },
   month(d){ const [y,m]=calMonth.split('-').map(Number); const dt=new Date(y,m-1+d,1); calMonth=dt.getFullYear()+'-'+p2(dt.getMonth()+1); renderAll(); },
   toTodo(id){ const x=Store.coll('ddls').find(d=>d.id===id);
     API.data.create('todos',{name:x.name,priority:'P0',cat:x.type==='考试'?'学习':'其他',due:x.due<=todayStr()?todayStr():x.due,done:false,note:'来自 DDL：'+x.type,createdAt:todayStr()});
@@ -1567,7 +1581,7 @@ function renderAll(){
   })();
 })();
 Store.load();
-renderNav(); renderAll();
+applyRoute(); renderNav(); renderAll();
 if(API_CONFIG.mode==='custom'){ API.data.sync().then(()=>renderAll()); }
 setInterval(()=>{ renderTopbar(); if(curModule==='courses') renderCourses(); }, 60000);
 setInterval(()=>{ if(API_CONFIG.mode==='custom') API.data.sync(); }, 10000);
