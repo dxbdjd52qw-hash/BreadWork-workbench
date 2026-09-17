@@ -355,16 +355,16 @@ body{font-family:var(--font);letter-spacing:0;color:var(--ink);background:var(--
 
 /* --- 卡片：细边 + 两层柔和阴影（去掉厚玻璃边框） --- */
 .card,.home-card,.stat-card,.pin-item{
-  background:rgba(255,255,255,.88); border:1px solid var(--line); border-radius:var(--r-lg);
+  background:rgba(255,255,255,.72); border:1px solid var(--line); border-radius:var(--r-lg);
   box-shadow:var(--sh-1); backdrop-filter:blur(20px) saturate(170%); -webkit-backdrop-filter:blur(20px) saturate(170%);
   transition:transform 180ms var(--ease), box-shadow 180ms var(--ease), border-color 180ms var(--ease);
 }
 .home-card:hover,.stat-card:hover{transform:translateY(-2px); box-shadow:var(--sh-2)}
 /* --- 顶栏 / 侧栏 --- */
-#topbar{background:rgba(245,246,248,.84); border-bottom:1px solid var(--line)}
+#topbar{background:rgba(245,246,248,.78); border-bottom:1px solid var(--line)}
 #topbar .title{font-weight:650; letter-spacing:-.01em}
 #topbar .countdown{background:var(--accent-soft); color:#8A4D00; border-radius:999px; padding:5px 12px; font-weight:600; font-size:12.5px}
-#sidebar{background:rgba(250,250,252,.84); border-right:1px solid var(--line)}
+#sidebar{background:rgba(250,250,252,.68); border-right:1px solid var(--line)}
 #sidebar .nav-btn{border-radius:9px; transition:background 180ms var(--ease),color 180ms var(--ease)}
 #sidebar .nav-btn:hover{background:rgba(21,23,28,.045)}
 #sidebar .nav-btn.active{background:var(--brand-soft); color:var(--brand-deep)}
@@ -443,7 +443,7 @@ input.field:focus,select.field:focus,textarea.field:focus{background:#fff; borde
 #aiFab{background:rgba(27,30,37,.9); box-shadow:var(--sh-2); transition:transform 180ms var(--ease)}
 #aiFab:hover{transform:scale(1.06)}
 /* --- 底部 tab --- */
-#tabbar{background:rgba(255,255,255,.9); border-top:1px solid var(--line)}
+#tabbar{background:rgba(255,255,255,.78); border-top:1px solid var(--line)}
 #tabbar button{transition:color 180ms var(--ease), transform 120ms var(--ease)}
 #tabbar button.active{color:var(--brand)}
 #tabbar button:active{transform:scale(.94)}
@@ -1722,24 +1722,22 @@ function renderAll(){
   renderTopbar(); renderPinned();
   ({home:renderHome, todos:renderTodos, courses:renderCourses, words:renderWords, progress:renderProgress, mistakes:renderMis, notes:renderNotes, dash:renderDash, ddls:renderDdl})[curModule]();
 }
-/* ---------- 背景：Gradient Waves（WebGL，react-bits 风格 · 蓝调克制版） ----------
-   参数集中在 PARAMS 里，想更明显/更淡改 opacity 与 amplitude 即可。
-   做了这些工程处理：分辨率缩放、30fps 上限、页面隐藏暂停、
-   系统「减少动态效果」时只渲染一帧静态图、WebGL 不可用则降级为 CSS 渐变。 */
+/* ---------- 背景：Gradient Waves（WebGL，react-bits 风格 · 蓝调版） ----------
+   全屏波带映射：整个视口都是流动的波浪，而不是只有顶部。
+   工程处理：分辨率缩放 / 30fps 上限 / 页签隐藏暂停 /
+   系统「减少动态效果」只渲染一帧 / WebGL 不可用降级为 CSS 渐变 / 鼠标视差。
+   强度与配色全部集中在 PARAMS 里。 */
 (function initGradientWaves(){
   const cv = document.getElementById('particles'); if(!cv) return;
 
   const PARAMS = {
-    horizon:'#E2EBFF',   // 远处雾色（浅）
-    wave:'#8FB8FF',      // 中景波体
-    crest:'#FFFFFF',     // 近处波峰高光
+    horizon:'#DCE9FF',   // 远处薄雾色
+    wave:'#8FBCFF',      // 波谷色（蓝）
+    crest:'#FFFFFF',     // 波峰色（白）
     speed:0.30,          // 流动速度
-    amplitude:2.2,       // 波高
-    scale:1.0,           // 波的空间频率
-    ratio:0.9,           // 长短波比例
-    swell:34,            // 大尺度横向涌浪
-    turbulence:16,       // 湍流扰动
-    fogDepth:14,         // 远处雾化距离
+    scale:1.0,           // 波的空间尺度
+    bands:3.4,           // 全屏波带数量（越大条纹越密）
+    warp:0.75,           // 波带的扭曲强度（越大波浪越明显）
     resScale:0.62,       // 渲染分辨率缩放（越小越省电）
     maxFPS:30,           // 帧率上限
     parallax:0.35        // 鼠标视差强度
@@ -1751,42 +1749,40 @@ function renderAll(){
                                  premultipliedAlpha:false, powerPreference:'low-power'})
       || cv.getContext('experimental-webgl');
   }catch(e){ gl = null; }
-  if(!gl) return;   // 降级：沿用 CSS 兜底渐变（在样式里已写好）
+  if(!gl) return;   // 降级：样式里已写好 CSS 兜底渐变
 
   const VS = 'attribute vec2 p; void main(){ gl_Position = vec4(p,0.0,1.0); }';
-  const FS = [
-    'precision mediump float;',
-    'uniform vec2 u_res; uniform float u_time; uniform vec2 u_mouse;',
-    'uniform vec3 u_horizon, u_wave, u_crest;',
-    'uniform float u_speed, u_amp, u_scale, u_ratio, u_swell, u_turb, u_fog;',
-    'float hash(vec2 p){ p = fract(p*vec2(127.1,311.7)); p += dot(p, p+34.23); return fract(p.x*p.y); }',
-    'float noise(vec2 p){ vec2 i=floor(p), f=fract(p); f=f*f*(3.0-2.0*f);',
-    '  float a=hash(i), b=hash(i+vec2(1.0,0.0)), c=hash(i+vec2(0.0,1.0)), d=hash(i+vec2(1.0,1.0));',
-    '  return mix(mix(a,b,f.x), mix(c,d,f.x), f.y); }',
-    'float fbm(vec2 p){ float s=0.0, a=0.5; for(int i=0;i<3;i++){ s+=a*noise(p); p*=2.05; a*=0.5; } return s; }',
-    'void main(){',
-    '  vec2 uv = gl_FragCoord.xy / u_res.xy;',
-    '  vec2 p  = (gl_FragCoord.xy - 0.5*u_res) / u_res.y;',
-    '  float t = u_time * u_speed;',
-    '  float depth = 1.0 / max(0.06, (1.0 - uv.y)*0.9 + 0.10);',   // 顶部远、底部近
-    '  vec2 q = vec2(p.x * depth * u_scale, depth * u_scale * u_ratio);',
-    '  float w  = sin(q.x*u_swell*0.06 + t*0.55 + fbm(q*0.35 + t*0.05)*2.2) * 0.60;',
-    '  w += sin(q.y*0.80 - t*0.40 + fbm(q*0.50 - t*0.04)*1.8) * 0.40;',
-    '  w += (fbm(q*0.70 + w*1.2 + vec2(t*0.15, -t*0.10)) - 0.5) * u_turb*0.02;',
-    '  float band = uv.y + w * u_amp * 0.17 * (0.35 + uv.y*0.9);',
-    '  vec3 col = mix(u_crest, u_wave, smoothstep(0.05, 0.55, band));',
-    '  col = mix(col, u_horizon, smoothstep(0.55, 0.95, band));',
-    '  float crest = smoothstep(0.42, 0.62, band) * (1.0 - smoothstep(0.62, 0.80, band));',
-    '  col += crest * 0.22;',
-    '  float fog = 1.0 - exp(-depth * (1.0/max(1.0,u_fog)) * 0.6);',
-    '  col = mix(col, u_horizon, clamp(fog,0.0,1.0) * 0.85);',
-    '  gl_FragColor = vec4(col, 1.0);',
-    '}'
-  ].join(String.fromCharCode(10));
+  const FS = `
+precision mediump float;
+uniform vec2 u_res; uniform float u_time; uniform vec2 u_mouse;
+uniform vec3 u_horizon, u_wave, u_crest;
+uniform float u_speed, u_scale, u_bands, u_warp;
+float hash(vec2 p){ p = fract(p*vec2(127.1,311.7)); p += dot(p, p+34.23); return fract(p.x*p.y); }
+float noise(vec2 p){ vec2 i=floor(p), f=fract(p); f=f*f*(3.0-2.0*f);
+  float a=hash(i), b=hash(i+vec2(1.0,0.0)), c=hash(i+vec2(0.0,1.0)), d=hash(i+vec2(1.0,1.0));
+  return mix(mix(a,b,f.x), mix(c,d,f.x), f.y); }
+float fbm(vec2 p){ float s=0.0, a=0.5; for(int i=0;i<3;i++){ s+=a*noise(p); p*=2.05; a*=0.5; } return s; }
+void main(){
+  vec2 uv = gl_FragCoord.xy / u_res.xy;
+  vec2 p  = (gl_FragCoord.xy - 0.5*u_res) / u_res.y;
+  float t = u_time * u_speed;
+  float depth = 1.0 / max(0.10, uv.y*0.9 + 0.10);
+  vec2 q = vec2(p.x*depth*u_scale*0.55 + u_mouse.x, depth*u_scale*0.5 + u_mouse.y);
+  float w  = sin(q.x*1.0  + t*0.55 + fbm(q*0.30 + t*0.05)*2.4) * 0.50;
+  w += sin(q.y*1.7 - t*0.38 + fbm(q*0.45 - t*0.03)*1.6) * 0.32;
+  w += (fbm(q*0.85 + vec2(t*0.08, t*0.06)) - 0.5) * 0.55;
+  float bands = uv.y*u_bands + w*u_warp;
+  float f = fract(bands);
+  float tri = 1.0 - abs(f*2.0 - 1.0);
+  vec3 col = mix(u_wave, u_crest, tri);
+  float fog = clamp((1.0 - uv.y)*0.18, 0.0, 1.0);
+  col = mix(col, u_horizon, fog);
+  gl_FragColor = vec4(col, 1.0);
+}`;
 
   function sh(type, src){
     const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s);
-    if(!gl.getShaderParameter(s, gl.COMPILE_STATUS)){ return null; }
+    if(!gl.getShaderParameter(s, gl.COMPILE_STATUS)) return null;
     return s;
   }
   const vs = sh(gl.VERTEX_SHADER, VS), fs = sh(gl.FRAGMENT_SHADER, FS);
@@ -1804,13 +1800,13 @@ function renderAll(){
   gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
 
   const U = {};
-  ['u_res','u_time','u_mouse','u_horizon','u_wave','u_crest','u_speed','u_amp','u_scale','u_ratio','u_swell','u_turb','u_fog']
+  ['u_res','u_time','u_mouse','u_horizon','u_wave','u_crest','u_speed','u_scale','u_bands','u_warp']
     .forEach(function(n){ U[n] = gl.getUniformLocation(prog, n); });
 
-  const hex2rgb = function(h){
+  function hex2rgb(h){
     const v = parseInt(h.replace('#',''), 16);
     return [((v>>16)&255)/255, ((v>>8)&255)/255, (v&255)/255];
-  };
+  }
 
   let mx = 0, my = 0, tmx = 0, tmy = 0;
   addEventListener('mousemove', function(e){
@@ -1822,22 +1818,16 @@ function renderAll(){
     const dpr = Math.min(devicePixelRatio || 1, 1.5) * PARAMS.resScale;
     const w = Math.max(1, Math.floor(innerWidth * dpr));
     const h = Math.max(1, Math.floor(innerHeight * dpr));
-    if (cv.width !== w || cv.height !== h){
-      cv.width = w; cv.height = h;
-      gl.viewport(0, 0, w, h);
-    }
+    if (cv.width !== w || cv.height !== h){ cv.width = w; cv.height = h; gl.viewport(0, 0, w, h); }
   }
 
   gl.uniform3fv(U.u_horizon, hex2rgb(PARAMS.horizon));
   gl.uniform3fv(U.u_wave,    hex2rgb(PARAMS.wave));
   gl.uniform3fv(U.u_crest,   hex2rgb(PARAMS.crest));
   gl.uniform1f(U.u_speed, PARAMS.speed);
-  gl.uniform1f(U.u_amp,   PARAMS.amplitude);
   gl.uniform1f(U.u_scale, PARAMS.scale);
-  gl.uniform1f(U.u_ratio, PARAMS.ratio);
-  gl.uniform1f(U.u_swell, PARAMS.swell);
-  gl.uniform1f(U.u_turb,  PARAMS.turbulence);
-  gl.uniform1f(U.u_fog,   PARAMS.fogDepth);
+  gl.uniform1f(U.u_bands, PARAMS.bands);
+  gl.uniform1f(U.u_warp,  PARAMS.warp);
 
   const reduce = matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
   let running = true, last = 0, t0 = performance.now();
@@ -1847,15 +1837,14 @@ function renderAll(){
     if(now - last < 1000 / PARAMS.maxFPS){ requestAnimationFrame(frame); return; }
     last = now;
     resize();
-    mx += (tmx - mx) * 0.06; my += (tmy - my) * 0.06;
+    mx += (tmx - mx)*0.06; my += (tmy - my)*0.06;
     gl.uniform2f(U.u_res, cv.width, cv.height);
-    gl.uniform1f(U.u_time, (now - t0) / 1000);
+    gl.uniform1f(U.u_time, (now - t0)/1000);
     gl.uniform2f(U.u_mouse, mx, my);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
   }
 
   if (reduce){
-    // 只画一帧静态图，不做动画
     resize();
     gl.uniform2f(U.u_res, cv.width, cv.height);
     gl.uniform1f(U.u_time, 12.0);
