@@ -483,8 +483,81 @@ table.course-grid th,table.course-grid td.sec-cell,.cal th{background:rgba(21,23
 }
 
 /* --- 背景层：Gradient Waves（WebGL）+ WebGL 不可用时的 CSS 兜底 --- */
-#particles{opacity:1; background:radial-gradient(120% 85% at 50% 112%, #DCE8FF 0%, rgba(245,246,248,0) 62%)}
+#particles{opacity:1; width:100%; height:100%; display:block; background:radial-gradient(120% 85% at 50% 112%, #DCE8FF 0%, rgba(245,246,248,0) 62%)}
 @media (prefers-reduced-motion:reduce){ #particles{opacity:.24} }
+
+/* ============================================================
+   react-bits 风格组件
+   · Specular Button：1px 镜面高光沿按钮边缘、角度跟随鼠标
+   · Line Sidebar：左侧标记线 + 指针邻近度反应（线条生长 / 文字微移）
+   ============================================================ */
+
+/* --- Specular Button --- */
+.btn{position:relative; --ang:0deg; --mx:50% ; --my:50%; --spec:rgba(255,255,255,.95)}
+/* 镜面柔光：跟随鼠标位置在按钮内部形成一层反光 */
+.btn::before{
+  content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
+  background:radial-gradient(130px circle at var(--mx) var(--my),
+      rgba(255,255,255,.30), rgba(255,255,255,0) 72%);
+  opacity:0; transition:opacity 220ms var(--ease);
+}
+.btn:hover::before,.btn:focus-visible::before{opacity:1}
+.btn::after{
+  content:""; position:absolute; inset:0; box-sizing:border-box; padding:1.5px;
+  border-radius:inherit; pointer-events:none;
+  background:conic-gradient(from calc(var(--ang) - 22deg),
+      rgba(255,255,255,0) 0deg,
+      var(--spec) 22deg,
+      rgba(255,255,255,0) 44deg,
+      rgba(255,255,255,0) 360deg);
+  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;
+  mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite:exclude;
+  opacity:0; transition:opacity 220ms var(--ease);
+}
+.btn:hover::after,.btn:focus-visible::after{opacity:1}
+/* 浅底按钮改用蓝色高光才看得见 */
+.btn.ghost,.btn.soft,.btn.danger-ghost{--spec:rgba(10,108,255,.65)}
+.btn.ghost::before,.btn.soft::before,.btn.danger-ghost::before{
+  background:radial-gradient(130px circle at var(--mx) var(--my),
+      rgba(10,108,255,.16), rgba(10,108,255,0) 72%);
+}
+.btn.green{--spec:rgba(255,255,255,.95)}
+
+/* --- Line Sidebar --- */
+#sidebar .nav-btn{--m:0; position:relative; padding-left:26px}
+#sidebar .nav-btn::before,
+#sidebar .nav-btn::after{
+  content:""; position:absolute; left:7px; top:50%; height:2px; border-radius:1px;
+  transform:translateY(-50%);
+  transition:width 140ms var(--ease), opacity 140ms var(--ease);
+}
+#sidebar .nav-btn::before{width:10px; background:var(--line-strong)}
+#sidebar .nav-btn::after{width:calc(8px + 15px * var(--m)); background:var(--brand); opacity:var(--m)}
+#sidebar .nav-btn.active::after{width:21px; opacity:1}
+#sidebar .nav-btn .lbl{transform:translateX(calc(3px * var(--m))); transition:transform 140ms var(--ease)}
+#sidebar .nav-btn .ic{transition:transform 140ms var(--ease)}
+@media (prefers-reduced-motion:reduce){
+  #sidebar .nav-btn::after{opacity:var(--m)}
+}
+
+/* --- 「今天要处理」条目排版：标签紧凑等宽、高度与文字对齐、文字省略、按钮右对齐 --- */
+#pinned .pin-list{align-items:stretch}
+#pinned .pin-item{gap:9px; min-width:228px; max-width:376px; padding:8px 12px; min-height:44px}
+#pinned .pin-item .tag{
+  height:20px; line-height:20px; padding:0 8px; font-size:11.5px;
+  align-items:center; justify-content:center; flex:0 0 auto;
+}
+#pinned .pin-item .b{
+  min-width:0; flex:1 1 auto; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  font-size:14px; line-height:20px;
+}
+#pinned .pin-item .muted{white-space:nowrap; flex:0 0 auto; font-size:12.5px; line-height:20px}
+#pinned .pin-item .btn{flex:0 0 auto; margin-left:auto; white-space:nowrap; height:28px; padding:0 10px; font-size:12.5px}
+@media (max-width:820px){
+  #pinned .pin-item{min-width:206px; max-width:300px}
+}
 </style>
 </head>
 <body>
@@ -738,7 +811,7 @@ const MODULES = [
 let curModule = 'home';
 
 function renderNav(){
-  $('#navList').innerHTML = MODULES.map(m=>`<button class="nav-btn ${curModule===m.id?'active':''}" onclick="go('${m.id}')"><span class="ic">${m.icon}</span>${m.name}</button>`).join('');
+  $('#navList').innerHTML = MODULES.map(m=>`<button class="nav-btn ${curModule===m.id?'active':''}" onclick="go('${m.id}')"><span class="ic">${m.icon}</span><span class="lbl">${m.name}</span></button>`).join('');
   $('#tabbar').innerHTML = MODULES.map(m=>`<button class="${curModule===m.id?'active':''}" onclick="go('${m.id}')"><span class="ic">${m.icon}</span>${m.name.replace('今日','').replace('我的','').replace('DDL 倒计时','DDL')}</button>`).join('');
 }
 /* ---------- 路由：地址栏 hash 持久化（刷新/前进后退都停在当前位置） ---------- */
@@ -1731,13 +1804,13 @@ function renderAll(){
   const cv = document.getElementById('particles'); if(!cv) return;
 
   const PARAMS = {
-    horizon:'#DCE9FF',   // 远处薄雾色
-    wave:'#8FBCFF',      // 波谷色（蓝）
+    horizon:'#FAFCFF',   // 远处薄雾色
+    wave:'#D8E7FF',      // 波谷色（蓝，极淡）
     crest:'#FFFFFF',     // 波峰色（白）
-    speed:0.30,          // 流动速度
+    speed:2.20,          // 流动速度（>1 就有明显流动感）
     scale:1.0,           // 波的空间尺度
-    bands:3.4,           // 全屏波带数量（越大条纹越密）
-    warp:0.75,           // 波带的扭曲强度（越大波浪越明显）
+    bands:4.2,           // 全屏波带数量（越大条纹越密）
+    warp:0.80,           // 波带的扭曲强度（越大波浪越明显）
     resScale:0.62,       // 渲染分辨率缩放（越小越省电）
     maxFPS:30,           // 帧率上限
     parallax:0.35        // 鼠标视差强度
@@ -1768,9 +1841,9 @@ void main(){
   float t = u_time * u_speed;
   float depth = 1.0 / max(0.10, uv.y*0.9 + 0.10);
   vec2 q = vec2(p.x*depth*u_scale*0.55 + u_mouse.x, depth*u_scale*0.5 + u_mouse.y);
-  float w  = sin(q.x*1.0  + t*0.55 + fbm(q*0.30 + t*0.05)*2.4) * 0.50;
-  w += sin(q.y*1.7 - t*0.38 + fbm(q*0.45 - t*0.03)*1.6) * 0.32;
-  w += (fbm(q*0.85 + vec2(t*0.08, t*0.06)) - 0.5) * 0.55;
+  float w  = sin(q.x*1.0  + t*0.55 + fbm(q*0.30 + t*0.14)*2.4) * 0.50;
+  w += sin(q.y*1.7 - t*0.38 + fbm(q*0.45 - t*0.10)*1.6) * 0.32;
+  w += (fbm(q*0.85 + vec2(t*0.26, t*0.20)) - 0.5) * 0.55;
   float bands = uv.y*u_bands + w*u_warp;
   float f = fract(bands);
   float tri = 1.0 - abs(f*2.0 - 1.0);
@@ -1829,37 +1902,35 @@ void main(){
   gl.uniform1f(U.u_bands, PARAMS.bands);
   gl.uniform1f(U.u_warp,  PARAMS.warp);
 
+  // 系统开启「减少动态效果」时：不停止，而是降帧降速（缓慢流动，避免大幅动画）
   const reduce = matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const fps  = reduce ? 12 : PARAMS.maxFPS;
+  const tScale = reduce ? 0.40 : 1.0;
+
   let running = true, last = 0, t0 = performance.now();
 
   function frame(now){
-    if(!running) return;
-    if(now - last < 1000 / PARAMS.maxFPS){ requestAnimationFrame(frame); return; }
+    if (!running) return;
+    requestAnimationFrame(frame);
+    if (now - last < 1000 / fps) return;
     last = now;
     resize();
-    mx += (tmx - mx)*0.06; my += (tmy - my)*0.06;
+    if (!reduce){ mx += (tmx - mx)*0.06; my += (tmy - my)*0.06; }
     gl.uniform2f(U.u_res, cv.width, cv.height);
-    gl.uniform1f(U.u_time, (now - t0)/1000);
+    gl.uniform1f(U.u_time, (now - t0)/1000 * tScale);
     gl.uniform2f(U.u_mouse, mx, my);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
   }
-
-  if (reduce){
-    resize();
-    gl.uniform2f(U.u_res, cv.width, cv.height);
-    gl.uniform1f(U.u_time, 12.0);
-    gl.uniform2f(U.u_mouse, 0, 0);
-    gl.drawArrays(gl.TRIANGLES, 0, 3);
-  } else {
-    requestAnimationFrame(frame);
-  }
+  requestAnimationFrame(frame);
 
   document.addEventListener('visibilitychange', function(){
-    if (reduce) return;
-    if (document.hidden){ running = false; }
-    else { running = true; last = 0; t0 = performance.now(); requestAnimationFrame(frame); }
+    if (document.hidden){
+      running = false;
+    } else if (!running){
+      running = true; last = 0; t0 = performance.now();
+      requestAnimationFrame(frame);
+    }
   });
-  addEventListener('resize', function(){ if(reduce) frame(performance.now()); });
 })();
 
 Store.load();
@@ -1941,6 +2012,58 @@ document.addEventListener('visibilitychange', ()=>{ if(!document.hidden && API_C
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();
   window.addEventListener('load', boot);
+})();
+</script>
+<script>
+/* ============ react-bits 风格交互：Specular Button / Line Sidebar ============ */
+(function(){
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* 1) Specular Button：镜面高光角度指向鼠标 */
+  document.addEventListener('mousemove', function(e){
+    var el = e.target && e.target.closest && e.target.closest('.btn');
+    if (!el) return;
+    var r = el.getBoundingClientRect();
+    var ang = Math.atan2(e.clientY - (r.top + r.height/2), e.clientX - (r.left + r.width/2)) * 180 / Math.PI + 90;
+    el.style.setProperty('--ang', ang.toFixed(1) + 'deg');
+    el.style.setProperty('--mx', (e.clientX - r.left).toFixed(1) + 'px');
+    el.style.setProperty('--my', (e.clientY - r.top).toFixed(1) + 'px');
+  }, {passive:true});
+
+  /* 2) Line Sidebar：指针邻近度 → 标记线生长 + 文字微移 */
+  var sidebar = document.getElementById('sidebar');
+  if (!sidebar) return;
+  var items = [], centers = [], R = 88;   // R = 影响半径(px)
+
+  function collect(){
+    items = [].slice.call(sidebar.querySelectorAll('.nav-btn'));
+    centers = items.map(function(el){
+      var r = el.getBoundingClientRect();
+      return r.top + r.height/2;
+    });
+  }
+  function update(my){
+    for (var i = 0; i < items.length; i++){
+      var d = Math.abs(my - centers[i]);
+      var m = d >= R ? 0 : Math.pow(1 - d/R, 1.5);   // smooth falloff
+      items[i].style.setProperty('--m', m.toFixed(3));
+    }
+  }
+  function reset(){
+    for (var i = 0; i < items.length; i++) items[i].style.setProperty('--m', '0');
+  }
+
+  sidebar.addEventListener('mousemove', function(e){ if (!reduce) update(e.clientY); });
+  sidebar.addEventListener('mouseleave', reset);
+  addEventListener('scroll', function(){ collect(); reset(); }, {passive:true});
+  addEventListener('resize', function(){ collect(); reset(); });
+
+  try{
+    new MutationObserver(function(){ collect(); reset(); })
+      .observe(sidebar, {childList:true, subtree:true});
+  }catch(e){}
+
+  collect();
 })();
 </script>
 </body>

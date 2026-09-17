@@ -1,5 +1,5 @@
 /* 麺包的工作台 · Service Worker（保守策略，保证应用可安装 + 弱网兜底，绝不缓存 API 数据） */
-const CACHE = 'ytwb-v1';
+const CACHE = 'ytwb-v2';
 const ASSETS = [
   './',
   './index.html',
