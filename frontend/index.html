@@ -481,6 +481,10 @@ table.course-grid th,table.course-grid td.sec-cell,.cal th{background:rgba(21,23
   .spotlight::before{display:none}
   .enter{opacity:1; transform:none; animation:none}
 }
+
+/* --- 背景层：Gradient Waves（WebGL）+ WebGL 不可用时的 CSS 兜底 --- */
+#particles{opacity:1; background:radial-gradient(120% 85% at 50% 112%, #DCE8FF 0%, rgba(245,246,248,0) 62%)}
+@media (prefers-reduced-motion:reduce){ #particles{opacity:.24} }
 </style>
 </head>
 <body>
@@ -1718,28 +1722,157 @@ function renderAll(){
   renderTopbar(); renderPinned();
   ({home:renderHome, todos:renderTodos, courses:renderCourses, words:renderWords, progress:renderProgress, mistakes:renderMis, notes:renderNotes, dash:renderDash, ddls:renderDdl})[curModule]();
 }
-/* ---------- 粒子背景（缓慢漂浮灰点 + 鼠标视差） ---------- */
-(function initParticles(){
-  const cv=document.getElementById('particles'); if(!cv) return;
-  const ctx=cv.getContext('2d');
-  let W,H,pts=[],mx=0,my=0;
-  function resize(){ W=cv.width=innerWidth; H=cv.height=innerHeight; }
-  resize(); addEventListener('resize',resize);
-  const N=Math.min(70,Math.max(30,Math.floor(innerWidth/22)));
-  for(let i=0;i<N;i++) pts.push({x:Math.random()*innerWidth,y:Math.random()*innerHeight,r:1+Math.random()*2.2,vx:(Math.random()-.5)*.22,vy:(Math.random()-.5)*.22,o:.04+Math.random()*.09,d:Math.random()*Math.PI*2});
-  addEventListener('mousemove',e=>{ mx=e.clientX/W-.5; my=e.clientY/H-.5; });
-  (function tick(){
-    ctx.clearRect(0,0,W,H);
-    for(const p of pts){
-      p.x+=p.vx; p.y+=p.vy; p.d+=.012;
-      if(p.x<-10)p.x=W+10; if(p.x>W+10)p.x=-10; if(p.y<-10)p.y=H+10; if(p.y>H+10)p.y=-10;
-      ctx.beginPath();
-      ctx.arc(p.x+mx*22*p.r, p.y+my*22*p.r, Math.max(.4,p.r+Math.sin(p.d)*.4), 0, Math.PI*2);
-      ctx.fillStyle='rgba(29,29,31,'+p.o+')'; ctx.fill();
+/* ---------- 背景：Gradient Waves（WebGL，react-bits 风格 · 蓝调克制版） ----------
+   参数集中在 PARAMS 里，想更明显/更淡改 opacity 与 amplitude 即可。
+   做了这些工程处理：分辨率缩放、30fps 上限、页面隐藏暂停、
+   系统「减少动态效果」时只渲染一帧静态图、WebGL 不可用则降级为 CSS 渐变。 */
+(function initGradientWaves(){
+  const cv = document.getElementById('particles'); if(!cv) return;
+
+  const PARAMS = {
+    horizon:'#E2EBFF',   // 远处雾色（浅）
+    wave:'#8FB8FF',      // 中景波体
+    crest:'#FFFFFF',     // 近处波峰高光
+    speed:0.30,          // 流动速度
+    amplitude:2.2,       // 波高
+    scale:1.0,           // 波的空间频率
+    ratio:0.9,           // 长短波比例
+    swell:34,            // 大尺度横向涌浪
+    turbulence:16,       // 湍流扰动
+    fogDepth:14,         // 远处雾化距离
+    resScale:0.62,       // 渲染分辨率缩放（越小越省电）
+    maxFPS:30,           // 帧率上限
+    parallax:0.35        // 鼠标视差强度
+  };
+
+  let gl = null;
+  try{
+    gl = cv.getContext('webgl', {alpha:true, antialias:false, depth:false, stencil:false,
+                                 premultipliedAlpha:false, powerPreference:'low-power'})
+      || cv.getContext('experimental-webgl');
+  }catch(e){ gl = null; }
+  if(!gl) return;   // 降级：沿用 CSS 兜底渐变（在样式里已写好）
+
+  const VS = 'attribute vec2 p; void main(){ gl_Position = vec4(p,0.0,1.0); }';
+  const FS = [
+    'precision mediump float;',
+    'uniform vec2 u_res; uniform float u_time; uniform vec2 u_mouse;',
+    'uniform vec3 u_horizon, u_wave, u_crest;',
+    'uniform float u_speed, u_amp, u_scale, u_ratio, u_swell, u_turb, u_fog;',
+    'float hash(vec2 p){ p = fract(p*vec2(127.1,311.7)); p += dot(p, p+34.23); return fract(p.x*p.y); }',
+    'float noise(vec2 p){ vec2 i=floor(p), f=fract(p); f=f*f*(3.0-2.0*f);',
+    '  float a=hash(i), b=hash(i+vec2(1.0,0.0)), c=hash(i+vec2(0.0,1.0)), d=hash(i+vec2(1.0,1.0));',
+    '  return mix(mix(a,b,f.x), mix(c,d,f.x), f.y); }',
+    'float fbm(vec2 p){ float s=0.0, a=0.5; for(int i=0;i<3;i++){ s+=a*noise(p); p*=2.05; a*=0.5; } return s; }',
+    'void main(){',
+    '  vec2 uv = gl_FragCoord.xy / u_res.xy;',
+    '  vec2 p  = (gl_FragCoord.xy - 0.5*u_res) / u_res.y;',
+    '  float t = u_time * u_speed;',
+    '  float depth = 1.0 / max(0.06, (1.0 - uv.y)*0.9 + 0.10);',   // 顶部远、底部近
+    '  vec2 q = vec2(p.x * depth * u_scale, depth * u_scale * u_ratio);',
+    '  float w  = sin(q.x*u_swell*0.06 + t*0.55 + fbm(q*0.35 + t*0.05)*2.2) * 0.60;',
+    '  w += sin(q.y*0.80 - t*0.40 + fbm(q*0.50 - t*0.04)*1.8) * 0.40;',
+    '  w += (fbm(q*0.70 + w*1.2 + vec2(t*0.15, -t*0.10)) - 0.5) * u_turb*0.02;',
+    '  float band = uv.y + w * u_amp * 0.17 * (0.35 + uv.y*0.9);',
+    '  vec3 col = mix(u_crest, u_wave, smoothstep(0.05, 0.55, band));',
+    '  col = mix(col, u_horizon, smoothstep(0.55, 0.95, band));',
+    '  float crest = smoothstep(0.42, 0.62, band) * (1.0 - smoothstep(0.62, 0.80, band));',
+    '  col += crest * 0.22;',
+    '  float fog = 1.0 - exp(-depth * (1.0/max(1.0,u_fog)) * 0.6);',
+    '  col = mix(col, u_horizon, clamp(fog,0.0,1.0) * 0.85);',
+    '  gl_FragColor = vec4(col, 1.0);',
+    '}'
+  ].join(String.fromCharCode(10));
+
+  function sh(type, src){
+    const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s);
+    if(!gl.getShaderParameter(s, gl.COMPILE_STATUS)){ return null; }
+    return s;
+  }
+  const vs = sh(gl.VERTEX_SHADER, VS), fs = sh(gl.FRAGMENT_SHADER, FS);
+  if(!vs || !fs) return;
+  const prog = gl.createProgram();
+  gl.attachShader(prog, vs); gl.attachShader(prog, fs); gl.linkProgram(prog);
+  if(!gl.getProgramParameter(prog, gl.LINK_STATUS)) return;
+  gl.useProgram(prog);
+
+  const buf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 3,-1, -1,3]), gl.STATIC_DRAW);
+  const loc = gl.getAttribLocation(prog, 'p');
+  gl.enableVertexAttribArray(loc);
+  gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+
+  const U = {};
+  ['u_res','u_time','u_mouse','u_horizon','u_wave','u_crest','u_speed','u_amp','u_scale','u_ratio','u_swell','u_turb','u_fog']
+    .forEach(function(n){ U[n] = gl.getUniformLocation(prog, n); });
+
+  const hex2rgb = function(h){
+    const v = parseInt(h.replace('#',''), 16);
+    return [((v>>16)&255)/255, ((v>>8)&255)/255, (v&255)/255];
+  };
+
+  let mx = 0, my = 0, tmx = 0, tmy = 0;
+  addEventListener('mousemove', function(e){
+    tmx = (e.clientX / innerWidth  - 0.5) * PARAMS.parallax;
+    tmy = (e.clientY / innerHeight - 0.5) * PARAMS.parallax;
+  }, {passive:true});
+
+  function resize(){
+    const dpr = Math.min(devicePixelRatio || 1, 1.5) * PARAMS.resScale;
+    const w = Math.max(1, Math.floor(innerWidth * dpr));
+    const h = Math.max(1, Math.floor(innerHeight * dpr));
+    if (cv.width !== w || cv.height !== h){
+      cv.width = w; cv.height = h;
+      gl.viewport(0, 0, w, h);
     }
-    requestAnimationFrame(tick);
-  })();
+  }
+
+  gl.uniform3fv(U.u_horizon, hex2rgb(PARAMS.horizon));
+  gl.uniform3fv(U.u_wave,    hex2rgb(PARAMS.wave));
+  gl.uniform3fv(U.u_crest,   hex2rgb(PARAMS.crest));
+  gl.uniform1f(U.u_speed, PARAMS.speed);
+  gl.uniform1f(U.u_amp,   PARAMS.amplitude);
+  gl.uniform1f(U.u_scale, PARAMS.scale);
+  gl.uniform1f(U.u_ratio, PARAMS.ratio);
+  gl.uniform1f(U.u_swell, PARAMS.swell);
+  gl.uniform1f(U.u_turb,  PARAMS.turbulence);
+  gl.uniform1f(U.u_fog,   PARAMS.fogDepth);
+
+  const reduce = matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let running = true, last = 0, t0 = performance.now();
+
+  function frame(now){
+    if(!running) return;
+    if(now - last < 1000 / PARAMS.maxFPS){ requestAnimationFrame(frame); return; }
+    last = now;
+    resize();
+    mx += (tmx - mx) * 0.06; my += (tmy - my) * 0.06;
+    gl.uniform2f(U.u_res, cv.width, cv.height);
+    gl.uniform1f(U.u_time, (now - t0) / 1000);
+    gl.uniform2f(U.u_mouse, mx, my);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+  }
+
+  if (reduce){
+    // 只画一帧静态图，不做动画
+    resize();
+    gl.uniform2f(U.u_res, cv.width, cv.height);
+    gl.uniform1f(U.u_time, 12.0);
+    gl.uniform2f(U.u_mouse, 0, 0);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+  } else {
+    requestAnimationFrame(frame);
+  }
+
+  document.addEventListener('visibilitychange', function(){
+    if (reduce) return;
+    if (document.hidden){ running = false; }
+    else { running = true; last = 0; t0 = performance.now(); requestAnimationFrame(frame); }
+  });
+  addEventListener('resize', function(){ if(reduce) frame(performance.now()); });
 })();
+
 Store.load();
 applyRoute(); renderNav(); renderAll();
 if(API_CONFIG.mode==='custom'){ API.data.sync().then(()=>renderAll()); }
