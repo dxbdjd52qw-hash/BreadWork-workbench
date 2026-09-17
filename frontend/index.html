@@ -338,7 +338,7 @@ table.course-grid th,table.course-grid td.sec-cell,.cal th{background:rgba(0,0,0
       <div class="title">麺包的工作台</div>
       <div class="countdown" id="countdown" style="cursor:pointer" title="点击设置初试日期" onclick="ExamDate.edit()"></div>
       <div class="spacer"></div>
-      <div class="sync-badge" id="syncBadge"><span class="dot"></span><span id="syncText">本地模式</span></div>
+      <div class="sync-badge" id="syncBadge" style="cursor:pointer" title="同步异常？点此配置接口" onclick="AI.configUI()"><span class="dot"></span><span id="syncText">本地模式</span></div>
       <button id="aiEntry" onclick="AI.open()"><i class="fa-solid fa-wand-magic-sparkles"></i> AI 助手</button>
     </header>
     <section id="pinned"></section>
@@ -400,6 +400,8 @@ const Store = {
   save(){ this.data.meta.updatedAt = new Date().toISOString(); localStorage.setItem(this.key, JSON.stringify(this.data));
     clearTimeout(Store._t); Store._t=setTimeout(()=>{ if(typeof API!=='undefined') API.data.sync(); }, 800); },
   coll(n){ return (this.data[n]||[]).filter(x=>x&&!x.deleted); },
+  /* 原始数组（含墓碑），仅用于 push/unshift/splice 等写操作；读取请用 coll() */
+  arr(n){ if(!Array.isArray(this.data[n])) this.data[n]=[]; return this.data[n]; },
   add(c,item){ item.id=item.id||uid(); item.updatedAt=new Date().toISOString(); this.data[c].push(item); this.save(); return item; },
   update(c,id,patch){ const it=this.data[c].find(x=>x.id===id); if(it){Object.assign(it,patch,{updatedAt:new Date().toISOString()}); this.save();} return it; },
   remove(c,id){ const it=this.data[c].find(x=>x.id===id); if(it){ it.deleted=true; it.updatedAt=new Date().toISOString(); this.save(); } }
@@ -1453,9 +1455,9 @@ function renderDdl(){
 const AI = {
   open(){ renderDrawer(); $('#aiDrawer').classList.add('open'); },
   close(){ $('#aiDrawer').classList.remove('open'); },
-  cur(){ let s=Store.coll('chatSessions'); if(!s.length){ s.push({id:uid(),title:'新会话',msgs:[],updatedAt:new Date().toISOString()}); Store.save(); } return Store.coll('chatSessions')[0]; },
-  newSess(){ Store.coll('chatSessions').unshift({id:uid(),title:'新会话',msgs:[],updatedAt:new Date().toISOString()}); Store.save(); renderDrawer(); },
-  pick(id){ const s=Store.coll('chatSessions'); const i=s.findIndex(x=>x.id===id); if(i>0){ s.unshift(s.splice(i,1)[0]); Store.save(); } renderDrawer(); },
+  cur(){ const a=Store.arr('chatSessions'); let live=a.filter(x=>x&&!x.deleted); if(!live.length){ a.push({id:uid(),title:'新会话',msgs:[],updatedAt:new Date().toISOString()}); Store.save(); live=a.filter(x=>x&&!x.deleted); } return live[0]; },
+  newSess(){ Store.arr('chatSessions').unshift({id:uid(),title:'新会话',msgs:[],updatedAt:new Date().toISOString()}); Store.save(); renderDrawer(); },
+  pick(id){ const a=Store.arr('chatSessions'); const i=a.findIndex(x=>x.id===id&&!x.deleted); if(i>0){ a.unshift(a.splice(i,1)[0]); Store.save(); } renderDrawer(); },
   clear(){ if(confirm('清空当前会话？')){ const s=this.cur(); s.msgs=[]; s.updatedAt=new Date().toISOString(); Store.save(); renderDrawer(); } },
   configUI(){
     openModal(`<h3>配置 AI 接口</h3>
