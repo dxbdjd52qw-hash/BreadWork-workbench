@@ -96,7 +96,7 @@ input.field:focus,select.field:focus,textarea.field:focus{border-color:var(--pri
 .home-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;cursor:pointer;transition:.18s;display:flex;flex-direction:column;gap:8px;min-height:150px}
 .home-card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(31,36,48,.12);border-color:#c9cfec}
 .home-card .hc-head{display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px}
-.home-card .hc-head .arrow{margin-left:auto;color:#c3c9dc;font-size:16px}
+.home-card .hc-head .arrow{margin-left:auto;color:var(--muted);font-size:16px}
 .home-card .hc-big{font-size:24px;font-weight:800}
 .home-card .hc-sub{font-size:12px;color:var(--muted);line-height:1.7}
 .advice-item{display:flex;align-items:flex-start;gap:10px;padding:9px 4px;border-bottom:1px solid var(--line);font-size:13px;line-height:1.7;cursor:pointer}
@@ -323,6 +323,164 @@ table.course-grid th,table.course-grid td.sec-cell,.cal th{background:rgba(0,0,0
 .advice-item:hover .adv-text{color:var(--ink)}
 .note-item:hover .n-title{color:var(--ink)}
 .section-title i,.card h3 i{opacity:.85}
+
+/* ============================================================
+   设计系统 v2 · 2026-09-17
+   参考：ui-ux-pro-max-skill / impeccable / react-bits / Apple HIG
+   要点：中性色带蓝调、文字非纯黑、iOS 蓝 + 暖橙点睛、无 bounce、尊重 reduced-motion
+   ============================================================ */
+:root{
+  --bg:#F5F6F8; --card:rgba(255,255,255,.88); --ink:#15171C; --ink-2:#4B5058;
+  --muted:#868C96; --line:rgba(21,23,28,.09); --line-strong:rgba(21,23,28,.16);
+  --brand:#0A6CFF; --brand-deep:#0053CC; --brand-soft:rgba(10,108,255,.10);
+  --primary:#0A6CFF; --primary-soft:rgba(10,108,255,.10);
+  --accent:#F08A0C; --accent-soft:rgba(240,138,12,.13);
+  --danger:#D93B3F; --danger-soft:rgba(217,59,63,.11);
+  --warn:#C77A08; --warn-soft:rgba(199,122,8,.13);
+  --ok:#1E9E57; --ok-soft:rgba(30,158,87,.12);
+  --vivid:#0A6CFF; --vivid2:#4D92FF;
+  --surface-2:#EEEFF3; --surface-3:#E5E7EC;
+  --r-sm:8px; --r-md:12px; --r-lg:16px; --r-xl:20px; --radius:16px;
+  --sh-1:0 1px 2px rgba(16,18,24,.04),0 1px 3px rgba(16,18,24,.06);
+  --sh-2:0 2px 6px rgba(16,18,24,.05),0 10px 28px rgba(16,18,24,.07);
+  --shadow:var(--sh-1);
+  --font:"PingFang SC","HarmonyOS Sans SC","MiSans","Microsoft YaHei UI",-apple-system,"Segoe UI",system-ui,sans-serif;
+  --font-num:"SF Pro Display","Segoe UI Variable Display",Manrope,var(--font);
+  --ease:cubic-bezier(.22,.61,.36,1); --ease-out:cubic-bezier(.16,1,.3,1);
+}
+body{font-family:var(--font);letter-spacing:0;color:var(--ink);background:var(--bg)}
+.hc-big,.ddl-days,.num,.stat-card b,.topbar .countdown{font-family:var(--font-num);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.section-title{font-weight:650;letter-spacing:-.01em}
+.card h3{font-weight:600;letter-spacing:-.005em}
+
+/* --- 卡片：细边 + 两层柔和阴影（去掉厚玻璃边框） --- */
+.card,.home-card,.stat-card,.pin-item{
+  background:rgba(255,255,255,.88); border:1px solid var(--line); border-radius:var(--r-lg);
+  box-shadow:var(--sh-1); backdrop-filter:blur(20px) saturate(170%); -webkit-backdrop-filter:blur(20px) saturate(170%);
+  transition:transform 180ms var(--ease), box-shadow 180ms var(--ease), border-color 180ms var(--ease);
+}
+.home-card:hover,.stat-card:hover{transform:translateY(-2px); box-shadow:var(--sh-2)}
+/* --- 顶栏 / 侧栏 --- */
+#topbar{background:rgba(245,246,248,.84); border-bottom:1px solid var(--line)}
+#topbar .title{font-weight:650; letter-spacing:-.01em}
+#topbar .countdown{background:var(--accent-soft); color:#8A4D00; border-radius:999px; padding:5px 12px; font-weight:600; font-size:12.5px}
+#sidebar{background:rgba(250,250,252,.84); border-right:1px solid var(--line)}
+#sidebar .nav-btn{border-radius:9px; transition:background 180ms var(--ease),color 180ms var(--ease)}
+#sidebar .nav-btn:hover{background:rgba(21,23,28,.045)}
+#sidebar .nav-btn.active{background:var(--brand-soft); color:var(--brand-deep)}
+#sidebar .foot{font-size:11px; color:var(--muted); opacity:.8; line-height:1.6}
+#aiEntry{background:#1B1E25; border-radius:999px; transition:transform 120ms var(--ease),background 180ms var(--ease)}
+#aiEntry:hover{transform:none; background:#0F1116}
+#aiEntry:active{transform:scale(.97)}
+.sync-badge{border-radius:999px; border:1px solid var(--line); background:#fff}
+/* --- 按钮 --- */
+.btn{background:var(--brand); border-radius:var(--r-md); font-weight:550;
+  box-shadow:0 1px 2px rgba(10,108,255,.20);
+  transition:transform 120ms var(--ease), background 180ms var(--ease), box-shadow 180ms var(--ease)}
+.btn:hover{background:var(--brand-deep); opacity:1; transform:translateY(-1px); box-shadow:0 2px 8px rgba(10,108,255,.24)}
+.btn:active{transform:scale(.965)}
+.btn.ghost{background:var(--surface-2); border:1px solid transparent; color:var(--ink); box-shadow:none}
+.btn.ghost:hover{background:var(--surface-3); transform:none}
+.btn.soft{background:var(--brand-soft); color:var(--brand-deep); box-shadow:none}
+.btn.soft:hover{background:rgba(10,108,255,.16)}
+.btn.green{background:var(--ok); background-image:none; color:#fff; box-shadow:0 1px 2px rgba(30,158,87,.22)}
+.btn.green:hover{background:#187F46}
+.btn.danger-ghost{background:var(--danger-soft); color:var(--danger); box-shadow:none}
+.btn.danger-ghost:hover{background:rgba(217,59,63,.18)}
+/* --- 标签 --- */
+.tag{border-radius:6px; height:21px; padding:0 8px; font-size:11.5px; font-weight:600}
+.tag.p0,.tag.red{background:var(--danger-soft); color:var(--danger)}
+.tag.p1,.tag.blue{background:var(--brand-soft); color:var(--brand-deep)}
+.tag.p2,.tag.gray{background:var(--surface-2); color:var(--muted)}
+.tag.cat{background:var(--surface-2); color:var(--ink-2)}
+.tag.green,.tag.done{background:var(--ok-soft); color:var(--ok)}
+.tag.orange{background:var(--warn-soft); color:var(--warn)}
+/* --- 输入 --- */
+input.field,select.field,textarea.field{background:var(--surface-2); border:1px solid transparent; border-radius:var(--r-md);
+  transition:background 180ms var(--ease), border-color 180ms var(--ease), box-shadow 180ms var(--ease)}
+input.field:focus,select.field:focus,textarea.field:focus{background:#fff; border-color:var(--brand); box-shadow:0 0 0 4px var(--brand-soft)}
+/* --- 分段控件 / 筛选 --- */
+.filter-tabs{background:var(--surface-2); border-radius:10px; padding:3px}
+.filter-tabs button{border-radius:8px; transition:background 180ms var(--ease), box-shadow 180ms var(--ease), color 180ms var(--ease)}
+.filter-tabs button.active{background:#fff; color:var(--ink); box-shadow:var(--sh-1)}
+.subj-tabs button{border-radius:8px; transition:background 180ms var(--ease)}
+.subj-tabs button.active{background:var(--brand); color:#fff}
+/* --- 进度 --- */
+.progress-track{background:var(--surface-3); border-radius:999px}
+.progress-fill{background:var(--brand); background-image:none; box-shadow:none; border-radius:999px;
+  transition:width 900ms var(--ease-out)}
+.progress-fill.green{background:var(--ok); background-image:none; box-shadow:none}
+/* --- 复选 --- */
+.todo-check{border-color:var(--line-strong); border-radius:50%;
+  transition:background 180ms var(--ease), border-color 180ms var(--ease), transform 120ms var(--ease)}
+.todo-check:hover{border-color:var(--brand)}
+.todo-check.on{background:var(--ok); border-color:var(--ok)}
+.todo-check.on:active{transform:scale(.9)}
+/* --- 待办条目 --- */
+.todo-item{border-bottom:1px solid var(--line); transition:background 180ms var(--ease)}
+.todo-item:hover{background:rgba(21,23,28,.02)}
+.todo-item.overdue{background:linear-gradient(90deg,var(--danger-soft),transparent); border-radius:8px}
+/* --- DDL 时间轴（纯 CSS，不改结构） --- */
+.card .ddl-item{position:relative; border-bottom:none; padding-left:26px; margin-bottom:2px;
+  background-image:linear-gradient(var(--surface-3),var(--surface-3));
+  background-size:1.5px 100%; background-position:9.5px 0; background-repeat:no-repeat;
+  transition:background-color 180ms var(--ease)}
+.card .ddl-item:first-child{background-image:none}
+.card .ddl-item::before{content:""; position:absolute; left:5px; top:50%; transform:translateY(-50%);
+  width:10px; height:10px; border-radius:50%; background:#fff; border:2.5px solid var(--surface-3)}
+.card .ddl-item:first-child::before{border-color:var(--accent); box-shadow:0 0 0 4px var(--accent-soft)}
+/* --- 背诵 / 错题卡：深色带蓝调（去纯黑） --- */
+.flash-card{background:linear-gradient(150deg,#191C22,#2A2F38); border-radius:var(--r-xl); box-shadow:var(--sh-2)}
+.mis-review-card{background:linear-gradient(150deg,#191C22,#2A2F38); border-radius:var(--r-xl); box-shadow:var(--sh-2)}
+/* --- 弹窗 / AI 抽屉 --- */
+.modal{background:rgba(255,255,255,.94); border-radius:var(--r-xl); border:1px solid var(--line); box-shadow:var(--sh-2)}
+#aiDrawer{background:rgba(255,255,255,.88)}
+.msg.user{background:#1B1E25; border-radius:14px}
+.msg.bot{background:var(--surface-2); border-radius:14px}
+.ai-guide{background:var(--brand-soft); border:1px solid rgba(10,108,255,.16); color:var(--brand-deep)}
+.quick-cmds button{background:var(--surface-2); border-radius:999px; transition:background 180ms var(--ease)}
+.quick-cmds button:hover{background:var(--surface-3)}
+#aiFab{background:rgba(27,30,37,.9); box-shadow:var(--sh-2); transition:transform 180ms var(--ease)}
+#aiFab:hover{transform:scale(1.06)}
+/* --- 底部 tab --- */
+#tabbar{background:rgba(255,255,255,.9); border-top:1px solid var(--line)}
+#tabbar button{transition:color 180ms var(--ease), transform 120ms var(--ease)}
+#tabbar button.active{color:var(--brand)}
+#tabbar button:active{transform:scale(.94)}
+/* --- 其它 --- */
+.heat .cell{background:var(--surface-3)}
+.cal .today-cell{background:var(--brand-soft)}
+.mis-noimg{background:var(--surface-2); color:var(--muted)}
+.word-book-card{background:rgba(255,255,255,.8); border:1px solid var(--line); border-radius:var(--r-md);
+  transition:border-color 180ms var(--ease), background 180ms var(--ease)}
+.word-book-card.active{border-color:var(--brand); background:var(--brand-soft)}
+.course-cell.now{outline:2px solid var(--brand); box-shadow:0 0 0 4px var(--brand-soft)}
+.pin-item.overdue{border-color:rgba(217,59,63,.3); background:var(--danger-soft)}
+.pin-empty{background:rgba(255,255,255,.72)}
+table.course-grid th,table.course-grid td.sec-cell,.cal th{background:rgba(21,23,28,.03)}
+.note-item:hover .n-title,.advice-item:hover .adv-text{color:var(--brand-deep)}
+.ddl-days{font-family:var(--font-num); font-variant-numeric:tabular-nums; letter-spacing:-.02em}
+
+/* ============================================================
+   动效层（react-bits 思路，纯 CSS + 轻量 JS，全部可被系统关闭）
+   ============================================================ */
+.spotlight{position:relative}
+.spotlight::before{content:""; position:absolute; inset:0; pointer-events:none; opacity:0; border-radius:inherit;
+  transition:opacity 280ms var(--ease);
+  background:radial-gradient(300px circle at var(--mx,50%) var(--my,50%),rgba(10,108,255,.085),transparent 62%)}
+.spotlight:hover::before{opacity:1}
+.enter{animation:enterUp 420ms var(--ease-out) both}
+@keyframes enterUp{from{opacity:0; transform:translateY(10px)} to{opacity:1; transform:none}}
+@keyframes numFlash{0%{background:var(--brand-soft); color:var(--brand-deep)} 100%{background:transparent}}
+.num-flash{animation:numFlash 900ms var(--ease-out); border-radius:6px}
+.ring-anim{transition:stroke-dashoffset 1s var(--ease-out)}
+.sk{height:12px; border-radius:6px; background:linear-gradient(90deg,var(--surface-2) 25%,var(--surface-3) 37%,var(--surface-2) 63%); background-size:400% 100%; animation:shim 1.5s linear infinite}
+@keyframes shim{0%{background-position:100% 0}100%{background-position:-100% 0}}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms!important; animation-iteration-count:1!important; transition-duration:.001ms!important}
+  .spotlight::before{display:none}
+  .enter{opacity:1; transform:none; animation:none}
+}
 </style>
 </head>
 <body>
@@ -331,7 +489,7 @@ table.course-grid th,table.course-grid td.sec-cell,.cal th{background:rgba(0,0,0
   <aside id="sidebar">
     <div class="logo"><i class="fa-solid fa-bread-slice"></i> 麺包的工作台</div>
     <div id="navList"></div>
-    <div class="foot">数据存储：本地（资料库模式抽象层）<br>切换阿里云仅改 API_CONFIG.baseUrl</div>
+    <div class="foot">v0.5.0 · 云端已同步</div>
   </aside>
   <div id="main">
     <header id="topbar">
@@ -637,7 +795,7 @@ function renderPinned(){
 function ringSVG(pct,size=92,stroke=9,color='var(--vivid)',label){
   const r=(size-stroke)/2, c=2*Math.PI*r, off=c*(1-Math.min(100,Math.max(0,pct))/100);
   return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
-    <circle cx="${size/2}" cy="${size/2}" r="${r}" stroke="#eef0f6" stroke-width="${stroke}" fill="none"/>
+    <circle cx="${size/2}" cy="${size/2}" r="${r}" stroke="var(--surface-3)" stroke-width="${stroke}" fill="none"/>
     <circle cx="${size/2}" cy="${size/2}" r="${r}" stroke="${color}" stroke-width="${stroke}" fill="none" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${off}" transform="rotate(-90 ${size/2} ${size/2})"/>
     <text x="50%" y="47%" text-anchor="middle" dominant-baseline="middle" font-size="${size*0.2}" font-weight="800" fill="var(--ink)">${Math.round(pct)}%</text>
     ${label?`<text x="50%" y="66%" text-anchor="middle" font-size="10" fill="var(--muted)">${label}</text>`:''}
@@ -649,7 +807,7 @@ function compressImage(file){ return new Promise(res=>{ const r=new FileReader()
     const c=document.createElement('canvas'); c.width=w; c.height=h; c.getContext('2d').drawImage(img,0,0,w,h); res(c.toDataURL('image/jpeg',0.72)); };
     img.src=e.target.result; }; r.readAsDataURL(file); }); }
 function closeModal(){ $('#modalRoot').innerHTML=''; }
-function barColor(i){ return ['#f5f5f7,#1d1d1f','#e8e8ed,#1d1d1f','#e0e0e4,#1d1d1f','#d8d8de,#1d1d1f','#efeff2,#1d1d1f','#e4e4e9,#1d1d1f','#dcdce1,#1d1d1f'][i%7]; }
+function barColor(i){ return ['#F1F3F7,#0A6CFF','#E8ECF4,#0A6CFF','#DFE6F2,#0A6CFF','#D6E0F0,#0A6CFF','#CDD9EE,#0053CC','#C4D2EC,#0053CC','#BBCBEA,#0053CC'][i%7]; }
 
 /* =========================================================
  * 主页｜复盘 + 推荐做法 + 模块卡片
@@ -710,7 +868,7 @@ function renderHome(){
     </div>
     <div class="card">
       <h3><i class="fa-solid fa-lightbulb"></i> 推荐做法 <span class="muted" style="font-weight:400;font-size:12px">根据你的数据实时生成</span></h3>
-      ${homeAdvice().map(a=>`<div class="advice-item" onclick="go('${a.go}')"><span>${a.icon}</span><span class="adv-text grow">${esc(a.text)}</span><span style="color:#c3c9dc">›</span></div>`).join('')}
+      ${homeAdvice().map(a=>`<div class="advice-item" onclick="go('${a.go}')"><span>${a.icon}</span><span class="adv-text grow">${esc(a.text)}</span><span style="color:var(--muted)">›</span></div>`).join('')}
     </div>
   </div>
   <div class="section-title"><i class="fa-solid fa-house"></i> 主页 <span class="muted" style="font-weight:400;font-size:12px">点击卡片进入对应模块</span></div>
@@ -966,7 +1124,7 @@ function heatSVG(days,color){
     const d=addDays(start,w*7+r); if(d>t) continue;
     const log=logs.find(x=>x.date===d);
     const v=log&&log.checked? Math.min(1,(log.done||1)/max):0;
-    const shade = v===0?'#e8e8ed': v<.4?'#c2dcff': v<.7?'#7fb8ff': v<1?'#3d9bff':'#0a84ff';
+    const shade = v===0?'var(--surface-3)': v<.4?'rgba(10,108,255,.18)': v<.7?'rgba(10,108,255,.38)': v<1?'rgba(10,108,255,.62)':'var(--brand)';
     cells+=`<rect x="${w*14}" y="${r*14}" width="11" height="11" rx="3" fill="${shade}"><title>${d}：${log?log.done:0} 词</title></rect>`;
   }
   return `<svg width="${(days/7)*14}" height="${7*14}" style="max-width:100%">${cells}</svg>`;
@@ -1347,7 +1505,7 @@ function lineChartSVG(pairs,{w=520,h=180}={}){
 }
 function donutSVG(obj){
   const entries=Object.entries(obj).filter(e=>e[1]>0); const total=entries.reduce((s,e)=>s+e[1],0)||1;
-  const colors=['#0a84ff','#5e5ce6','#64d2ff','#30b0c7','#8e8e93'];
+  const colors=['#0A6CFF','#3D8BFF','#6FA8FF','#0F9E7A','#868C96'];
   const r=54,c=2*Math.PI*r; let acc=0, segs='';
   entries.forEach((e,i)=>{ const frac=e[1]/total;
     segs+=`<circle cx="70" cy="70" r="${r}" fill="none" stroke="${colors[i%5]}" stroke-width="20" stroke-dasharray="${(frac*c).toFixed(1)} ${c.toFixed(1)}" stroke-dashoffset="${(-acc*c).toFixed(1)}" transform="rotate(-90 70 70)"/>`; acc+=frac; });
@@ -1551,7 +1709,7 @@ function renderDrawer(){
 /* ---------- 小提示 ---------- */
 function toast(msg){
   const d=document.createElement('div');
-  d.style.cssText='position:fixed;top:70px;left:50%;transform:translateX(-50%);background:#1f2430;color:#fff;padding:10px 18px;border-radius:10px;z-index:99;font-size:13px;box-shadow:0 6px 20px rgba(0,0,0,.25)';
+  d.style.cssText='position:fixed;top:70px;left:50%;transform:translateX(-50%);background:#1B1E25;color:#fff;padding:10px 18px;border-radius:10px;z-index:99;font-size:13px;box-shadow:0 6px 20px rgba(0,0,0,.25)';
   d.textContent=msg; document.body.appendChild(d); setTimeout(()=>d.remove(),2200);
 }
 
@@ -1590,5 +1748,78 @@ setInterval(()=>{ if(API_CONFIG.mode==='custom') API.data.sync(); }, 10000);
 document.addEventListener('visibilitychange', ()=>{ if(!document.hidden && API_CONFIG.mode==='custom') API.data.sync(); });
 </script>
 <script>if('serviceWorker' in navigator && location.protocol.startsWith('http')){ navigator.serviceWorker.register('sw.js').catch(function(){}); }</script>
+<script>
+/* ============ 设计系统 v2 · 动效层 ============ */
+(function(){
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* 1) 聚光跟随：事件委托，零重绑开销 */
+  if (!reduce) {
+    document.addEventListener('mousemove', function(e){
+      var el = e.target && e.target.closest && e.target.closest('.card,.home-card,.stat-card,.pin-item');
+      if (!el) return;
+      var r = el.getBoundingClientRect();
+      el.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+      el.style.setProperty('--my', (e.clientY - r.top) + 'px');
+    }, {passive:true});
+  }
+
+  function decorate(){
+    document.querySelectorAll('.card,.home-card,.stat-card,.pin-item').forEach(function(el){
+      el.classList.add('spotlight');
+    });
+  }
+
+  /* 2) 首屏入场：只在页面加载时播一次，之后轮询渲染不再播（避免反复闪烁） */
+  var firstPaint = true;
+  function animateFirst(){
+    if (reduce || !firstPaint) return;
+    firstPaint = false;
+    document.querySelectorAll('#view > *').forEach(function(el, i){
+      el.classList.add('enter');
+      el.style.animationDelay = Math.min(i * 55, 330) + 'ms';
+    });
+  }
+
+  /* 3) 数值变化高亮：数据同步后数字变了会闪一下，让变化可感知 */
+  var seen = new WeakMap();
+  function watchNumbers(){
+    document.querySelectorAll('.hc-big,.ddl-days,.stat-card b,.donut-text,.ring svg text').forEach(function(el){
+      var txt = el.textContent;
+      var prev = seen.get(el);
+      if (prev !== undefined && prev !== txt){
+        el.classList.remove('num-flash');
+        void el.offsetWidth;
+        el.classList.add('num-flash');
+      }
+      seen.set(el, txt);
+    });
+  }
+
+  /* 4) 进度环生长过渡 */
+  function ringAnim(){
+    document.querySelectorAll('circle[stroke-dasharray]').forEach(function(c){ c.classList.add('ring-anim'); });
+  }
+
+  var timer = null;
+  function afterRender(){
+    clearTimeout(timer);
+    timer = setTimeout(function(){ decorate(); watchNumbers(); ringAnim(); }, 30);
+  }
+
+  try{
+    var mo = new MutationObserver(afterRender);
+    ['#view','#pinned','#sidebar','#tabbar'].forEach(function(sel){
+      var n = document.querySelector(sel);
+      if (n) mo.observe(n, {childList:true, subtree:true});
+    });
+  }catch(e){}
+
+  function boot(){ decorate(); ringAnim(); watchNumbers(); setTimeout(animateFirst, 80); }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+  window.addEventListener('load', boot);
+})();
+</script>
 </body>
 </html>
