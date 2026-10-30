@@ -1,0 +1,1500 @@
+[
+  {
+    "source": "3777268dea7532e99216b8954e04eb85c53f7f90",
+    "base": "2026-10-30",
+    "collections": {
+      "todos": [
+        {
+          "id": "demo-id",
+          "name": "整理线代错题本",
+          "priority": "P0",
+          "cat": "学习",
+          "due": "2026-10-29",
+          "done": false,
+          "note": "矩阵部分",
+          "createdAt": "2026-10-30"
+        },
+        {
+          "id": "demo-id",
+          "name": "高数第三章习题 1-20",
+          "priority": "P0",
+          "cat": "学习",
+          "due": "2026-10-30",
+          "done": false,
+          "note": "",
+          "createdAt": "2026-10-30"
+        },
+        {
+          "id": "demo-id",
+          "name": "背单词 100 个",
+          "priority": "P1",
+          "cat": "学习",
+          "due": "2026-10-30",
+          "done": false,
+          "note": "",
+          "createdAt": "2026-10-30"
+        },
+        {
+          "id": "demo-id",
+          "name": "晨跑 3 公里",
+          "priority": "P2",
+          "cat": "生活",
+          "due": "2026-10-30",
+          "done": true,
+          "doneAt": "2026-10-30T07:10:00",
+          "note": "",
+          "createdAt": "2026-10-30"
+        },
+        {
+          "id": "demo-id",
+          "name": "社团招新海报定稿",
+          "priority": "P2",
+          "cat": "社团",
+          "due": "2026-11-01",
+          "done": false,
+          "note": "",
+          "createdAt": "2026-10-30"
+        },
+        {
+          "id": "demo-id",
+          "name": "历史任务 2-1",
+          "priority": "P1",
+          "cat": "学习",
+          "due": "2026-10-29",
+          "done": true,
+          "doneAt": "2026-10-29T20:00:00",
+          "note": "",
+          "createdAt": "2026-10-29"
+        },
+        {
+          "id": "demo-id",
+          "name": "历史任务 2-2",
+          "priority": "P1",
+          "cat": "学习",
+          "due": "2026-10-29",
+          "done": true,
+          "doneAt": "2026-10-29T20:00:00",
+          "note": "",
+          "createdAt": "2026-10-29"
+        },
+        {
+          "id": "demo-id",
+          "name": "历史任务 2-3",
+          "priority": "P1",
+          "cat": "学习",
+          "due": "2026-10-29",
+          "done": true,
+          "doneAt": "2026-10-29T20:00:00",
+          "note": "",
+          "createdAt": "2026-10-29"
+        },
+        {
+          "id": "demo-id",
+          "name": "历史任务 3-1",
+          "priority": "P1",
+          "cat": "学习",
+          "due": "2026-10-28",
+          "done": true,
+          "doneAt": "2026-10-28T20:00:00",
+          "note": "",
+          "createdAt": "2026-10-28"
+        },
+        {
+          "id": "demo-id",
+          "name": "历史任务 3-2",
+          "priority": "P1",
+          "cat": "学习",
+          "due": "2026-10-28",
+          "done": true,
+          "doneAt": "2026-10-28T20:00:00",
+          "note": "",
+          "createdAt": "2026-10-28"
+        },
+        {
+          "id": "demo-id",
+          "name": "历史任务 4-1",
+          "priority": "P1",
+          "cat": "学习",
+          "due": "2026-10-27",
+          "done": true,
+          "doneAt": "2026-10-27T20:00:00",
+          "note": "",
+          "createdAt": "2026-10-27"
+        },
+        {
+          "id": "demo-id",
+          "name": "历史任务 5-1",
+          "priority": "P1",
+          "cat": "学习",
+          "due": "2026-10-26",
+          "done": true,
+          "doneAt": "2026-10-26T20:00:00",
+          "note": "",
+          "createdAt": "2026-10-26"
+        },
+        {
+          "id": "demo-id",
+          "name": "历史任务 5-2",
+          "priority": "P1",
+          "cat": "学习",
+          "due": "2026-10-26",
+          "done": true,
+          "doneAt": "2026-10-26T20:00:00",
+          "note": "",
+          "createdAt": "2026-10-26"
+        },
+        {
+          "id": "demo-id",
+          "name": "历史任务 5-3",
+          "priority": "P1",
+          "cat": "学习",
+          "due": "2026-10-26",
+          "done": true,
+          "doneAt": "2026-10-26T20:00:00",
+          "note": "",
+          "createdAt": "2026-10-26"
+        },
+        {
+          "id": "demo-id",
+          "name": "历史任务 6-1",
+          "priority": "P1",
+          "cat": "学习",
+          "due": "2026-10-25",
+          "done": true,
+          "doneAt": "2026-10-25T20:00:00",
+          "note": "",
+          "createdAt": "2026-10-25"
+        },
+        {
+          "id": "demo-id",
+          "name": "历史任务 6-2",
+          "priority": "P1",
+          "cat": "学习",
+          "due": "2026-10-25",
+          "done": true,
+          "doneAt": "2026-10-25T20:00:00",
+          "note": "",
+          "createdAt": "2026-10-25"
+        },
+        {
+          "id": "demo-id",
+          "name": "历史任务 7-1",
+          "priority": "P1",
+          "cat": "学习",
+          "due": "2026-10-24",
+          "done": true,
+          "doneAt": "2026-10-24T20:00:00",
+          "note": "",
+          "createdAt": "2026-10-24"
+        },
+        {
+          "id": "demo-id",
+          "name": "历史任务 8-1",
+          "priority": "P1",
+          "cat": "学习",
+          "due": "2026-10-23",
+          "done": true,
+          "doneAt": "2026-10-23T20:00:00",
+          "note": "",
+          "createdAt": "2026-10-23"
+        },
+        {
+          "id": "demo-id",
+          "name": "历史任务 8-2",
+          "priority": "P1",
+          "cat": "学习",
+          "due": "2026-10-23",
+          "done": true,
+          "doneAt": "2026-10-23T20:00:00",
+          "note": "",
+          "createdAt": "2026-10-23"
+        },
+        {
+          "id": "demo-id",
+          "name": "历史任务 8-3",
+          "priority": "P1",
+          "cat": "学习",
+          "due": "2026-10-23",
+          "done": true,
+          "doneAt": "2026-10-23T20:00:00",
+          "note": "",
+          "createdAt": "2026-10-23"
+        },
+        {
+          "id": "demo-id",
+          "name": "历史任务 9-1",
+          "priority": "P1",
+          "cat": "学习",
+          "due": "2026-10-22",
+          "done": true,
+          "doneAt": "2026-10-22T20:00:00",
+          "note": "",
+          "createdAt": "2026-10-22"
+        },
+        {
+          "id": "demo-id",
+          "name": "历史任务 9-2",
+          "priority": "P1",
+          "cat": "学习",
+          "due": "2026-10-22",
+          "done": true,
+          "doneAt": "2026-10-22T20:00:00",
+          "note": "",
+          "createdAt": "2026-10-22"
+        },
+        {
+          "id": "demo-id",
+          "name": "历史任务 10-1",
+          "priority": "P1",
+          "cat": "学习",
+          "due": "2026-10-21",
+          "done": true,
+          "doneAt": "2026-10-21T20:00:00",
+          "note": "",
+          "createdAt": "2026-10-21"
+        },
+        {
+          "id": "demo-id",
+          "name": "历史任务 11-1",
+          "priority": "P1",
+          "cat": "学习",
+          "due": "2026-10-20",
+          "done": true,
+          "doneAt": "2026-10-20T20:00:00",
+          "note": "",
+          "createdAt": "2026-10-20"
+        },
+        {
+          "id": "demo-id",
+          "name": "历史任务 11-2",
+          "priority": "P1",
+          "cat": "学习",
+          "due": "2026-10-20",
+          "done": true,
+          "doneAt": "2026-10-20T20:00:00",
+          "note": "",
+          "createdAt": "2026-10-20"
+        },
+        {
+          "id": "demo-id",
+          "name": "历史任务 11-3",
+          "priority": "P1",
+          "cat": "学习",
+          "due": "2026-10-20",
+          "done": true,
+          "doneAt": "2026-10-20T20:00:00",
+          "note": "",
+          "createdAt": "2026-10-20"
+        },
+        {
+          "id": "demo-id",
+          "name": "历史任务 12-1",
+          "priority": "P1",
+          "cat": "学习",
+          "due": "2026-10-19",
+          "done": true,
+          "doneAt": "2026-10-19T20:00:00",
+          "note": "",
+          "createdAt": "2026-10-19"
+        },
+        {
+          "id": "demo-id",
+          "name": "历史任务 12-2",
+          "priority": "P1",
+          "cat": "学习",
+          "due": "2026-10-19",
+          "done": true,
+          "doneAt": "2026-10-19T20:00:00",
+          "note": "",
+          "createdAt": "2026-10-19"
+        },
+        {
+          "id": "demo-id",
+          "name": "历史任务 13-1",
+          "priority": "P1",
+          "cat": "学习",
+          "due": "2026-10-18",
+          "done": true,
+          "doneAt": "2026-10-18T20:00:00",
+          "note": "",
+          "createdAt": "2026-10-18"
+        },
+        {
+          "id": "demo-id",
+          "name": "历史任务 14-1",
+          "priority": "P1",
+          "cat": "学习",
+          "due": "2026-10-17",
+          "done": true,
+          "doneAt": "2026-10-17T20:00:00",
+          "note": "",
+          "createdAt": "2026-10-17"
+        },
+        {
+          "id": "demo-id",
+          "name": "历史任务 14-2",
+          "priority": "P1",
+          "cat": "学习",
+          "due": "2026-10-17",
+          "done": true,
+          "doneAt": "2026-10-17T20:00:00",
+          "note": "",
+          "createdAt": "2026-10-17"
+        },
+        {
+          "id": "demo-id",
+          "name": "历史任务 14-3",
+          "priority": "P1",
+          "cat": "学习",
+          "due": "2026-10-17",
+          "done": true,
+          "doneAt": "2026-10-17T20:00:00",
+          "note": "",
+          "createdAt": "2026-10-17"
+        }
+      ],
+      "courses": [
+        {
+          "id": "demo-id",
+          "name": "高等数学A",
+          "teacher": "王教授",
+          "place": "教一 201",
+          "dow": 1,
+          "secStart": 1,
+          "secEnd": 2,
+          "weeks": [
+            1,
+            16
+          ],
+          "parity": 0,
+          "note": ""
+        },
+        {
+          "id": "demo-id",
+          "name": "英语精读",
+          "teacher": "李老师",
+          "place": "外语楼 305",
+          "dow": 2,
+          "secStart": 3,
+          "secEnd": 4,
+          "weeks": [
+            1,
+            16
+          ],
+          "parity": 0,
+          "note": ""
+        },
+        {
+          "id": "demo-id",
+          "name": "线性代数",
+          "teacher": "陈教授",
+          "place": "教二 102",
+          "dow": 3,
+          "secStart": 1,
+          "secEnd": 2,
+          "weeks": [
+            1,
+            16
+          ],
+          "parity": 0,
+          "note": ""
+        },
+        {
+          "id": "demo-id",
+          "name": "大学体育",
+          "teacher": "赵老师",
+          "place": "体育馆",
+          "dow": 4,
+          "secStart": 5,
+          "secEnd": 6,
+          "weeks": [
+            1,
+            16
+          ],
+          "parity": 1,
+          "note": "单周上课"
+        },
+        {
+          "id": "demo-id",
+          "name": "概率论与数理统计",
+          "teacher": "刘教授",
+          "place": "教一 301",
+          "dow": 5,
+          "secStart": 3,
+          "secEnd": 4,
+          "weeks": [
+            1,
+            16
+          ],
+          "parity": 0,
+          "note": ""
+        }
+      ],
+      "wordBooks": [
+        {
+          "id": "demo-id",
+          "name": "考研核心词汇",
+          "createdAt": "2026-10-30",
+          "words": [
+            {
+              "id": "demo-id",
+              "word": "abandon",
+              "phonetic": "/əˈbændən/",
+              "meaning": "v. 放弃；抛弃",
+              "example": "He decided to abandon the plan.",
+              "unit": 1,
+              "mastered": 0
+            },
+            {
+              "id": "demo-id",
+              "word": "ability",
+              "phonetic": "/əˈbɪləti/",
+              "meaning": "n. 能力；才能",
+              "example": "She has the ability to solve problems.",
+              "unit": 1,
+              "mastered": 0
+            },
+            {
+              "id": "demo-id",
+              "word": "abnormal",
+              "phonetic": "/æbˈnɔːrml/",
+              "meaning": "adj. 反常的；异常的",
+              "example": "abnormal weather conditions",
+              "unit": 1,
+              "mastered": 0
+            },
+            {
+              "id": "demo-id",
+              "word": "abolish",
+              "phonetic": "/əˈbɒlɪʃ/",
+              "meaning": "v. 废除；废止",
+              "example": "The law was abolished in 1990.",
+              "unit": 1,
+              "mastered": 0
+            },
+            {
+              "id": "demo-id",
+              "word": "abrupt",
+              "phonetic": "/əˈbrʌpt/",
+              "meaning": "adj. 突然的；唐突的",
+              "example": "an abrupt change of plan",
+              "unit": 1,
+              "mastered": 0
+            },
+            {
+              "id": "demo-id",
+              "word": "absorb",
+              "phonetic": "/əbˈzɔːb/",
+              "meaning": "v. 吸收；使专心",
+              "example": "Plants absorb sunlight.",
+              "unit": 1,
+              "mastered": 0
+            },
+            {
+              "id": "demo-id",
+              "word": "abstract",
+              "phonetic": "/ˈæbstrækt/",
+              "meaning": "adj. 抽象的 n. 摘要",
+              "example": "an abstract concept",
+              "unit": 1,
+              "mastered": 0
+            },
+            {
+              "id": "demo-id",
+              "word": "abundant",
+              "phonetic": "/əˈbʌndənt/",
+              "meaning": "adj. 丰富的；充裕的",
+              "example": "abundant natural resources",
+              "unit": 1,
+              "mastered": 0
+            },
+            {
+              "id": "demo-id",
+              "word": "accelerate",
+              "phonetic": "/əkˈseləreɪt/",
+              "meaning": "v. 加速；促进",
+              "example": "to accelerate economic growth",
+              "unit": 1,
+              "mastered": 0
+            },
+            {
+              "id": "demo-id",
+              "word": "access",
+              "phonetic": "/ˈækses/",
+              "meaning": "n./v. 接近；访问",
+              "example": "have access to the Internet",
+              "unit": 1,
+              "mastered": 0
+            },
+            {
+              "id": "demo-id",
+              "word": "accommodate",
+              "phonetic": "/əˈkɒmədeɪt/",
+              "meaning": "v. 容纳；为…提供住宿",
+              "example": "The hall can accommodate 500 people.",
+              "unit": 1,
+              "mastered": 0
+            },
+            {
+              "id": "demo-id",
+              "word": "accomplish",
+              "phonetic": "/əˈkʌmplɪʃ/",
+              "meaning": "v. 完成；实现",
+              "example": "accomplish a mission",
+              "unit": 1,
+              "mastered": 0
+            },
+            {
+              "id": "demo-id",
+              "word": "accurate",
+              "phonetic": "/ˈækjərət/",
+              "meaning": "adj. 精确的；准确的",
+              "example": "an accurate description",
+              "unit": 2,
+              "mastered": 0
+            },
+            {
+              "id": "demo-id",
+              "word": "accustom",
+              "phonetic": "/əˈkʌstəm/",
+              "meaning": "v. 使习惯于",
+              "example": "accustom oneself to hard work",
+              "unit": 2,
+              "mastered": 0
+            },
+            {
+              "id": "demo-id",
+              "word": "acknowledge",
+              "phonetic": "/əkˈnɒlɪdʒ/",
+              "meaning": "v. 承认；致谢",
+              "example": "He acknowledged his mistake.",
+              "unit": 2,
+              "mastered": 0
+            },
+            {
+              "id": "demo-id",
+              "word": "acquire",
+              "phonetic": "/əˈkwaɪə(r)/",
+              "meaning": "v. 获得；习得",
+              "example": "acquire knowledge",
+              "unit": 2,
+              "mastered": 0
+            },
+            {
+              "id": "demo-id",
+              "word": "adapt",
+              "phonetic": "/əˈdæpt/",
+              "meaning": "v. 适应；改编",
+              "example": "adapt to the new environment",
+              "unit": 2,
+              "mastered": 0
+            },
+            {
+              "id": "demo-id",
+              "word": "adequate",
+              "phonetic": "/ˈædɪkwət/",
+              "meaning": "adj. 足够的；适当的",
+              "example": "adequate preparation",
+              "unit": 2,
+              "mastered": 0
+            },
+            {
+              "id": "demo-id",
+              "word": "adjacent",
+              "phonetic": "/əˈdʒeɪsnt/",
+              "meaning": "adj. 邻近的；毗连的",
+              "example": "the building adjacent to the library",
+              "unit": 2,
+              "mastered": 0
+            },
+            {
+              "id": "demo-id",
+              "word": "advocate",
+              "phonetic": "/ˈædvəkeɪt/",
+              "meaning": "v. 提倡；拥护 n. 拥护者",
+              "example": "advocate free speech",
+              "unit": 2,
+              "mastered": 0
+            },
+            {
+              "id": "demo-id",
+              "word": "affection",
+              "phonetic": "/əˈfekʃn/",
+              "meaning": "n. 喜爱；感情",
+              "example": "a deep affection for her",
+              "unit": 2,
+              "mastered": 0
+            },
+            {
+              "id": "demo-id",
+              "word": "agenda",
+              "phonetic": "/əˈdʒendə/",
+              "meaning": "n. 议事日程；议程",
+              "example": "on the agenda",
+              "unit": 2,
+              "mastered": 0
+            },
+            {
+              "id": "demo-id",
+              "word": "allocate",
+              "phonetic": "/ˈæləkeɪt/",
+              "meaning": "v. 分配；拨给",
+              "example": "allocate funds to the project",
+              "unit": 2,
+              "mastered": 0
+            },
+            {
+              "id": "demo-id",
+              "word": "ambitious",
+              "phonetic": "/æmˈbɪʃəs/",
+              "meaning": "adj. 有雄心的；野心勃勃的",
+              "example": "an ambitious plan",
+              "unit": 2,
+              "mastered": 0
+            }
+          ]
+        }
+      ],
+      "wordLogs": [
+        {
+          "id": "demo-id",
+          "date": "2026-08-07",
+          "book": "考研核心词汇",
+          "target": 100,
+          "done": 90,
+          "minutes": 33,
+          "checked": true
+        },
+        {
+          "id": "demo-id",
+          "date": "2026-08-08",
+          "book": "考研核心词汇",
+          "target": 100,
+          "done": 100,
+          "minutes": 26,
+          "checked": true
+        },
+        {
+          "id": "demo-id",
+          "date": "2026-08-09",
+          "book": "考研核心词汇",
+          "target": 100,
+          "done": 100,
+          "minutes": 44,
+          "checked": true
+        },
+        {
+          "id": "demo-id",
+          "date": "2026-08-10",
+          "book": "考研核心词汇",
+          "target": 100,
+          "done": 80,
+          "minutes": 37,
+          "checked": true
+        },
+        {
+          "id": "demo-id",
+          "date": "2026-08-12",
+          "book": "考研核心词汇",
+          "target": 100,
+          "done": 100,
+          "minutes": 23,
+          "checked": true
+        },
+        {
+          "id": "demo-id",
+          "date": "2026-08-13",
+          "book": "考研核心词汇",
+          "target": 100,
+          "done": 70,
+          "minutes": 41,
+          "checked": true
+        },
+        {
+          "id": "demo-id",
+          "date": "2026-08-15",
+          "book": "考研核心词汇",
+          "target": 100,
+          "done": 90,
+          "minutes": 27,
+          "checked": true
+        },
+        {
+          "id": "demo-id",
+          "date": "2026-08-16",
+          "book": "考研核心词汇",
+          "target": 100,
+          "done": 100,
+          "minutes": 20,
+          "checked": true
+        },
+        {
+          "id": "demo-id",
+          "date": "2026-08-17",
+          "book": "考研核心词汇",
+          "target": 100,
+          "done": 100,
+          "minutes": 38,
+          "checked": true
+        },
+        {
+          "id": "demo-id",
+          "date": "2026-08-18",
+          "book": "考研核心词汇",
+          "target": 100,
+          "done": 80,
+          "minutes": 31,
+          "checked": true
+        },
+        {
+          "id": "demo-id",
+          "date": "2026-08-19",
+          "book": "考研核心词汇",
+          "target": 100,
+          "done": 60,
+          "minutes": 24,
+          "checked": true
+        },
+        {
+          "id": "demo-id",
+          "date": "2026-08-20",
+          "book": "考研核心词汇",
+          "target": 100,
+          "done": 100,
+          "minutes": 42,
+          "checked": true
+        },
+        {
+          "id": "demo-id",
+          "date": "2026-08-22",
+          "book": "考研核心词汇",
+          "target": 100,
+          "done": 100,
+          "minutes": 28,
+          "checked": true
+        },
+        {
+          "id": "demo-id",
+          "date": "2026-08-23",
+          "book": "考研核心词汇",
+          "target": 100,
+          "done": 90,
+          "minutes": 21,
+          "checked": true
+        },
+        {
+          "id": "demo-id",
+          "date": "2026-08-25",
+          "book": "考研核心词汇",
+          "target": 100,
+          "done": 100,
+          "minutes": 32,
+          "checked": true
+        },
+        {
+          "id": "demo-id",
+          "date": "2026-08-26",
+          "book": "考研核心词汇",
+          "target": 100,
+          "done": 80,
+          "minutes": 25,
+          "checked": true
+        },
+        {
+          "id": "demo-id",
+          "date": "2026-08-27",
+          "book": "考研核心词汇",
+          "target": 100,
+          "done": 60,
+          "minutes": 43,
+          "checked": true
+        },
+        {
+          "id": "demo-id",
+          "date": "2026-08-28",
+          "book": "考研核心词汇",
+          "target": 100,
+          "done": 100,
+          "minutes": 36,
+          "checked": true
+        },
+        {
+          "id": "demo-id",
+          "date": "2026-08-29",
+          "book": "考研核心词汇",
+          "target": 100,
+          "done": 70,
+          "minutes": 29,
+          "checked": true
+        },
+        {
+          "id": "demo-id",
+          "date": "2026-08-30",
+          "book": "考研核心词汇",
+          "target": 100,
+          "done": 100,
+          "minutes": 22,
+          "checked": true
+        },
+        {
+          "id": "demo-id",
+          "date": "2026-09-01",
+          "book": "考研核心词汇",
+          "target": 100,
+          "done": 100,
+          "minutes": 33,
+          "checked": true
+        },
+        {
+          "id": "demo-id",
+          "date": "2026-09-02",
+          "book": "考研核心词汇",
+          "target": 100,
+          "done": 100,
+          "minutes": 26,
+          "checked": true
+        },
+        {
+          "id": "demo-id",
+          "date": "2026-09-04",
+          "book": "考研核心词汇",
+          "target": 100,
+          "done": 60,
+          "minutes": 37,
+          "checked": true
+        },
+        {
+          "id": "demo-id",
+          "date": "2026-09-05",
+          "book": "考研核心词汇",
+          "target": 100,
+          "done": 100,
+          "minutes": 30,
+          "checked": true
+        },
+        {
+          "id": "demo-id",
+          "date": "2026-09-06",
+          "book": "考研核心词汇",
+          "target": 100,
+          "done": 70,
+          "minutes": 23,
+          "checked": true
+        },
+        {
+          "id": "demo-id",
+          "date": "2026-09-07",
+          "book": "考研核心词汇",
+          "target": 100,
+          "done": 100,
+          "minutes": 41,
+          "checked": true
+        },
+        {
+          "id": "demo-id",
+          "date": "2026-09-08",
+          "book": "考研核心词汇",
+          "target": 100,
+          "done": 90,
+          "minutes": 34,
+          "checked": true
+        },
+        {
+          "id": "demo-id",
+          "date": "2026-09-09",
+          "book": "考研核心词汇",
+          "target": 100,
+          "done": 100,
+          "minutes": 27,
+          "checked": true
+        },
+        {
+          "id": "demo-id",
+          "date": "2026-09-11",
+          "book": "考研核心词汇",
+          "target": 100,
+          "done": 80,
+          "minutes": 38,
+          "checked": true
+        },
+        {
+          "id": "demo-id",
+          "date": "2026-09-12",
+          "book": "考研核心词汇",
+          "target": 100,
+          "done": 60,
+          "minutes": 31,
+          "checked": true
+        },
+        {
+          "id": "demo-id",
+          "date": "2026-09-14",
+          "book": "考研核心词汇",
+          "target": 100,
+          "done": 70,
+          "minutes": 42,
+          "checked": true
+        },
+        {
+          "id": "demo-id",
+          "date": "2026-09-15",
+          "book": "考研核心词汇",
+          "target": 100,
+          "done": 100,
+          "minutes": 35,
+          "checked": true
+        },
+        {
+          "id": "demo-id",
+          "date": "2026-09-16",
+          "book": "考研核心词汇",
+          "target": 100,
+          "done": 90,
+          "minutes": 28,
+          "checked": true
+        },
+        {
+          "id": "demo-id",
+          "date": "2026-09-17",
+          "book": "考研核心词汇",
+          "target": 100,
+          "done": 100,
+          "minutes": 21,
+          "checked": true
+        },
+        {
+          "id": "demo-id",
+          "date": "2026-09-18",
+          "book": "考研核心词汇",
+          "target": 100,
+          "done": 100,
+          "minutes": 39,
+          "checked": true
+        },
+        {
+          "id": "demo-id",
+          "date": "2026-09-19",
+          "book": "考研核心词汇",
+          "target": 100,
+          "done": 80,
+          "minutes": 32,
+          "checked": true
+        },
+        {
+          "id": "demo-id",
+          "date": "2026-09-21",
+          "book": "考研核心词汇",
+          "target": 100,
+          "done": 100,
+          "minutes": 43,
+          "checked": true
+        },
+        {
+          "id": "demo-id",
+          "date": "2026-09-22",
+          "book": "考研核心词汇",
+          "target": 100,
+          "done": 70,
+          "minutes": 36,
+          "checked": true
+        },
+        {
+          "id": "demo-id",
+          "date": "2026-09-24",
+          "book": "考研核心词汇",
+          "target": 100,
+          "done": 90,
+          "minutes": 22,
+          "checked": true
+        },
+        {
+          "id": "demo-id",
+          "date": "2026-09-25",
+          "book": "考研核心词汇",
+          "target": 100,
+          "done": 100,
+          "minutes": 40,
+          "checked": true
+        },
+        {
+          "id": "demo-id",
+          "date": "2026-09-26",
+          "book": "考研核心词汇",
+          "target": 100,
+          "done": 100,
+          "minutes": 33,
+          "checked": true
+        },
+        {
+          "id": "demo-id",
+          "date": "2026-09-27",
+          "book": "考研核心词汇",
+          "target": 100,
+          "done": 80,
+          "minutes": 26,
+          "checked": true
+        },
+        {
+          "id": "demo-id",
+          "date": "2026-09-28",
+          "book": "考研核心词汇",
+          "target": 100,
+          "done": 60,
+          "minutes": 44,
+          "checked": true
+        },
+        {
+          "id": "demo-id",
+          "date": "2026-09-29",
+          "book": "考研核心词汇",
+          "target": 100,
+          "done": 100,
+          "minutes": 37,
+          "checked": true
+        },
+        {
+          "id": "demo-id",
+          "date": "2026-10-01",
+          "book": "考研核心词汇",
+          "target": 100,
+          "done": 100,
+          "minutes": 23,
+          "checked": true
+        },
+        {
+          "id": "demo-id",
+          "date": "2026-10-02",
+          "book": "考研核心词汇",
+          "target": 100,
+          "done": 90,
+          "minutes": 41,
+          "checked": true
+        },
+        {
+          "id": "demo-id",
+          "date": "2026-10-04",
+          "book": "考研核心词汇",
+          "target": 100,
+          "done": 100,
+          "minutes": 27,
+          "checked": true
+        },
+        {
+          "id": "demo-id",
+          "date": "2026-10-05",
+          "book": "考研核心词汇",
+          "target": 100,
+          "done": 80,
+          "minutes": 20,
+          "checked": true
+        },
+        {
+          "id": "demo-id",
+          "date": "2026-10-06",
+          "book": "考研核心词汇",
+          "target": 100,
+          "done": 60,
+          "minutes": 38,
+          "checked": true
+        },
+        {
+          "id": "demo-id",
+          "date": "2026-10-07",
+          "book": "考研核心词汇",
+          "target": 100,
+          "done": 100,
+          "minutes": 31,
+          "checked": true
+        },
+        {
+          "id": "demo-id",
+          "date": "2026-10-08",
+          "book": "考研核心词汇",
+          "target": 100,
+          "done": 70,
+          "minutes": 24,
+          "checked": true
+        },
+        {
+          "id": "demo-id",
+          "date": "2026-10-09",
+          "book": "考研核心词汇",
+          "target": 100,
+          "done": 100,
+          "minutes": 42,
+          "checked": true
+        },
+        {
+          "id": "demo-id",
+          "date": "2026-10-11",
+          "book": "考研核心词汇",
+          "target": 100,
+          "done": 100,
+          "minutes": 28,
+          "checked": true
+        },
+        {
+          "id": "demo-id",
+          "date": "2026-10-12",
+          "book": "考研核心词汇",
+          "target": 100,
+          "done": 100,
+          "minutes": 21,
+          "checked": true
+        },
+        {
+          "id": "demo-id",
+          "date": "2026-10-14",
+          "book": "考研核心词汇",
+          "target": 100,
+          "done": 60,
+          "minutes": 32,
+          "checked": true
+        },
+        {
+          "id": "demo-id",
+          "date": "2026-10-15",
+          "book": "考研核心词汇",
+          "target": 100,
+          "done": 100,
+          "minutes": 25,
+          "checked": true
+        },
+        {
+          "id": "demo-id",
+          "date": "2026-10-16",
+          "book": "考研核心词汇",
+          "target": 100,
+          "done": 70,
+          "minutes": 43,
+          "checked": true
+        },
+        {
+          "id": "demo-id",
+          "date": "2026-10-17",
+          "book": "考研核心词汇",
+          "target": 100,
+          "done": 100,
+          "minutes": 36,
+          "checked": true
+        },
+        {
+          "id": "demo-id",
+          "date": "2026-10-18",
+          "book": "考研核心词汇",
+          "target": 100,
+          "done": 90,
+          "minutes": 29,
+          "checked": true
+        },
+        {
+          "id": "demo-id",
+          "date": "2026-10-19",
+          "book": "考研核心词汇",
+          "target": 100,
+          "done": 100,
+          "minutes": 22,
+          "checked": true
+        },
+        {
+          "id": "demo-id",
+          "date": "2026-10-21",
+          "book": "考研核心词汇",
+          "target": 100,
+          "done": 80,
+          "minutes": 33,
+          "checked": true
+        },
+        {
+          "id": "demo-id",
+          "date": "2026-10-22",
+          "book": "考研核心词汇",
+          "target": 100,
+          "done": 60,
+          "minutes": 26,
+          "checked": true
+        },
+        {
+          "id": "demo-id",
+          "date": "2026-10-24",
+          "book": "考研核心词汇",
+          "target": 100,
+          "done": 70,
+          "minutes": 37,
+          "checked": true
+        },
+        {
+          "id": "demo-id",
+          "date": "2026-10-25",
+          "book": "考研核心词汇",
+          "target": 100,
+          "done": 100,
+          "minutes": 30,
+          "checked": true
+        },
+        {
+          "id": "demo-id",
+          "date": "2026-10-26",
+          "book": "考研核心词汇",
+          "target": 100,
+          "done": 90,
+          "minutes": 23,
+          "checked": true
+        },
+        {
+          "id": "demo-id",
+          "date": "2026-10-27",
+          "book": "考研核心词汇",
+          "target": 100,
+          "done": 100,
+          "minutes": 41,
+          "checked": true
+        },
+        {
+          "id": "demo-id",
+          "date": "2026-10-28",
+          "book": "考研核心词汇",
+          "target": 100,
+          "done": 100,
+          "minutes": 34,
+          "checked": true
+        },
+        {
+          "id": "demo-id",
+          "date": "2026-10-29",
+          "book": "考研核心词汇",
+          "target": 100,
+          "done": 80,
+          "minutes": 27,
+          "checked": true
+        }
+      ],
+      "progress": [
+        {
+          "id": "demo-id",
+          "subject": "数学",
+          "sub": "高数",
+          "name": "极限与连续",
+          "status": "已掌握",
+          "pct": 100,
+          "plan": "2026-10-10",
+          "note": ""
+        },
+        {
+          "id": "demo-id",
+          "subject": "数学",
+          "sub": "高数",
+          "name": "一元函数微分学",
+          "status": "进行中",
+          "pct": 60,
+          "plan": "2026-11-09",
+          "note": ""
+        },
+        {
+          "id": "demo-id",
+          "subject": "数学",
+          "sub": "线代",
+          "name": "矩阵及其运算",
+          "status": "进行中",
+          "pct": 30,
+          "plan": "2026-10-27",
+          "note": "特征值部分卡壳"
+        },
+        {
+          "id": "demo-id",
+          "subject": "数学",
+          "sub": "概率论",
+          "name": "随机事件与概率",
+          "status": "未开始",
+          "pct": 0,
+          "plan": "2026-11-29",
+          "note": ""
+        },
+        {
+          "id": "demo-id",
+          "subject": "英语",
+          "sub": "词汇",
+          "name": "核心词汇 5500",
+          "status": "进行中",
+          "pct": 45,
+          "plan": "2026-12-09",
+          "note": ""
+        },
+        {
+          "id": "demo-id",
+          "subject": "英语",
+          "sub": "阅读",
+          "name": "真题阅读 2010-2015",
+          "status": "进行中",
+          "pct": 30,
+          "plan": "2026-11-24",
+          "note": ""
+        },
+        {
+          "id": "demo-id",
+          "subject": "英语",
+          "sub": "写作",
+          "name": "大作文模板",
+          "status": "未开始",
+          "pct": 0,
+          "plan": "2026-12-29",
+          "note": ""
+        },
+        {
+          "id": "demo-id",
+          "subject": "英语",
+          "sub": "翻译",
+          "name": "长难句拆解",
+          "status": "未开始",
+          "pct": 0,
+          "plan": "2026-12-24",
+          "note": ""
+        },
+        {
+          "id": "demo-id",
+          "subject": "政治",
+          "sub": "马原",
+          "name": "唯物论与辩证法",
+          "status": "进行中",
+          "pct": 20,
+          "plan": "2026-12-14",
+          "note": ""
+        },
+        {
+          "id": "demo-id",
+          "subject": "政治",
+          "sub": "毛中特",
+          "name": "新思想概论",
+          "status": "未开始",
+          "pct": 0,
+          "plan": "2027-01-08",
+          "note": ""
+        },
+        {
+          "id": "demo-id",
+          "subject": "政治",
+          "sub": "史纲",
+          "name": "近代史时间线",
+          "status": "未开始",
+          "pct": 0,
+          "plan": "2027-01-18",
+          "note": ""
+        },
+        {
+          "id": "demo-id",
+          "subject": "政治",
+          "sub": "思修法基",
+          "name": "思想道德修养",
+          "status": "未开始",
+          "pct": 0,
+          "plan": "2027-01-28",
+          "note": ""
+        },
+        {
+          "id": "demo-id",
+          "subject": "政治",
+          "sub": "时政",
+          "name": "全年时政汇总",
+          "status": "未开始",
+          "pct": 0,
+          "plan": "2027-02-07",
+          "note": ""
+        }
+      ],
+      "notes": [
+        {
+          "id": "demo-id",
+          "date": "2026-10-29",
+          "type": "日复盘",
+          "done": "高数习题 20 道、单词 100 个",
+          "problem": "线代矩阵秩的概念理解不透",
+          "improve": "明天重看教材 3.2 节 + 错题整理",
+          "tomorrow": "线代错题本、英语阅读 2 篇",
+          "mood": "🙂",
+          "createdAt": "2026-10-29T21:30:00"
+        }
+      ],
+      "ddls": [
+        {
+          "id": "demo-id",
+          "name": "考研初试",
+          "type": "考试",
+          "due": "2027-12-25",
+          "done": false,
+          "note": "全国硕士研究生招生考试"
+        },
+        {
+          "id": "demo-id",
+          "name": "四六级考试",
+          "type": "考试",
+          "due": "2026-12-19",
+          "done": false,
+          "note": ""
+        },
+        {
+          "id": "demo-id",
+          "name": "英语演讲比赛报名截止",
+          "type": "报名",
+          "due": "2026-11-01",
+          "done": false,
+          "note": "学院初赛"
+        },
+        {
+          "id": "demo-id",
+          "name": "期末周开始",
+          "type": "考试",
+          "due": "2027-01-05",
+          "done": false,
+          "note": ""
+        }
+      ],
+      "mistakes": [
+        {
+          "id": "demo-id",
+          "subject": "数学",
+          "title": "极限定义理解偏差",
+          "question": "求 lim(x→0) (sin x - x) / x³ 的值。",
+          "answer": "用泰勒展开：sin x = x - x³/6 + o(x³)，原式 = -1/6。",
+          "images": [],
+          "tags": "高数,极限,泰勒展开",
+          "status": "复习中",
+          "reviewCount": 1,
+          "lastReview": "2026-10-28",
+          "nextReview": "2026-10-30",
+          "note": "之前直接用 sin x ~ x 等价替换，结果为 0，错了——减法式子不能随意等价。",
+          "aiAnalysis": "",
+          "createdAt": "2026-10-25T20:00:00"
+        },
+        {
+          "id": "demo-id",
+          "subject": "英语",
+          "title": "长难句主干找错",
+          "question": "The study, published in the journal Nature, suggests that birds living in urban environments have adapted their songs to compete with traffic noise.\n问：主句谓语动词是什么？",
+          "answer": "suggests。published... 是过去分词作后置定语，living... 是现在分词作定语修饰 birds，主干为 The study suggests that...。",
+          "images": [],
+          "tags": "阅读,长难句",
+          "status": "未掌握",
+          "reviewCount": 0,
+          "lastReview": "",
+          "nextReview": "2026-10-30",
+          "note": "把 published 当成谓语了。",
+          "aiAnalysis": "",
+          "createdAt": "2026-10-29T21:10:00"
+        }
+      ],
+      "chatSessions": [],
+      "meta": {
+        "wordTarget": 100,
+        "examDate": "2027-12-25",
+        "studyMinutes": {
+          "数学": 320,
+          "英语": 260,
+          "政治": 90,
+          "单词": 180,
+          "其他": 60
+        },
+        "updatedAt": "2026-10-30T13:35:32.927Z"
+      }
+    }
+  }
+]

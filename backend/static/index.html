@@ -631,6 +631,11 @@ const Store = {
     try{ this.data = JSON.parse(localStorage.getItem(this.key)); }catch(e){ this.data=null; }
     if(!this.data || !this.data.meta){ this.data = seedData(); this.save(); }
     if(!this.data.mistakes){ this.data.mistakes = []; this.save(); } // 旧数据迁移
+    const sampleMinutes={'数学':320,'英语':260,'政治':90,'单词':180,'其他':60};
+    const minutes=this.data.meta.studyMinutes;
+    if(minutes && Object.keys(minutes).length===5 && Object.keys(sampleMinutes).every(k=>minutes[k]===sampleMinutes[k])){
+      this.data.meta.studyMinutes=seedData().meta.studyMinutes; this.save();
+    } // 仅清理原样保留的演示时长，真实累计值不改动
   },
   save(){ this.data.meta.updatedAt = new Date().toISOString(); localStorage.setItem(this.key, JSON.stringify(this.data));
     clearTimeout(Store._t); Store._t=setTimeout(()=>{ if(typeof API!=='undefined') API.data.sync(); }, 800); },
@@ -643,92 +648,13 @@ const Store = {
 };
 
 function seedData(){
-  const t = todayStr();
-  const todos = [
-    {id:uid(),name:'整理线代错题本',priority:'P0',cat:'学习',due:addDays(t,-1),done:false,note:'矩阵部分',createdAt:t},
-    {id:uid(),name:'高数第三章习题 1-20',priority:'P0',cat:'学习',due:t,done:false,note:'',createdAt:t},
-    {id:uid(),name:'背单词 100 个',priority:'P1',cat:'学习',due:t,done:false,note:'',createdAt:t},
-    {id:uid(),name:'晨跑 3 公里',priority:'P2',cat:'生活',due:t,done:true,doneAt:t+'T07:10:00',note:'',createdAt:t},
-    {id:uid(),name:'社团招新海报定稿',priority:'P2',cat:'社团',due:addDays(t,2),done:false,note:'',createdAt:t},
-  ];
-  /* 历史完成记录：供趋势图展示 */
-  for(let i=1;i<=13;i++){
-    const n=(i*5)%3+1;
-    for(let j=0;j<n;j++) todos.push({id:uid(),name:'历史任务 '+(i+1)+'-'+(j+1),priority:'P1',cat:'学习',due:addDays(t,-i),done:true,doneAt:addDays(t,-i)+'T20:00:00',note:'',createdAt:addDays(t,-i)});
-  }
-  const courses = [
-    {id:uid(),name:'高等数学A',teacher:'王教授',place:'教一 201',dow:1,secStart:1,secEnd:2,weeks:[1,16],parity:0,note:''},
-    {id:uid(),name:'英语精读',teacher:'李老师',place:'外语楼 305',dow:2,secStart:3,secEnd:4,weeks:[1,16],parity:0,note:''},
-    {id:uid(),name:'线性代数',teacher:'陈教授',place:'教二 102',dow:3,secStart:1,secEnd:2,weeks:[1,16],parity:0,note:''},
-    {id:uid(),name:'大学体育',teacher:'赵老师',place:'体育馆',dow:4,secStart:5,secEnd:6,weeks:[1,16],parity:1,note:'单周上课'},
-    {id:uid(),name:'概率论与数理统计',teacher:'刘教授',place:'教一 301',dow:5,secStart:3,secEnd:4,weeks:[1,16],parity:0,note:''},
-  ];
-  const words1 = [
-    ['abandon','/əˈbændən/','v. 放弃；抛弃','He decided to abandon the plan.'],
-    ['ability','/əˈbɪləti/','n. 能力；才能','She has the ability to solve problems.'],
-    ['abnormal','/æbˈnɔːrml/','adj. 反常的；异常的','abnormal weather conditions'],
-    ['abolish','/əˈbɒlɪʃ/','v. 废除；废止','The law was abolished in 1990.'],
-    ['abrupt','/əˈbrʌpt/','adj. 突然的；唐突的','an abrupt change of plan'],
-    ['absorb','/əbˈzɔːb/','v. 吸收；使专心','Plants absorb sunlight.'],
-    ['abstract','/ˈæbstrækt/','adj. 抽象的 n. 摘要','an abstract concept'],
-    ['abundant','/əˈbʌndənt/','adj. 丰富的；充裕的','abundant natural resources'],
-    ['accelerate','/əkˈseləreɪt/','v. 加速；促进','to accelerate economic growth'],
-    ['access','/ˈækses/','n./v. 接近；访问','have access to the Internet'],
-    ['accommodate','/əˈkɒmədeɪt/','v. 容纳；为…提供住宿','The hall can accommodate 500 people.'],
-    ['accomplish','/əˈkʌmplɪʃ/','v. 完成；实现','accomplish a mission'],
-    ['accurate','/ˈækjərət/','adj. 精确的；准确的','an accurate description'],
-    ['accustom','/əˈkʌstəm/','v. 使习惯于','accustom oneself to hard work'],
-    ['acknowledge','/əkˈnɒlɪdʒ/','v. 承认；致谢','He acknowledged his mistake.'],
-    ['acquire','/əˈkwaɪə(r)/','v. 获得；习得','acquire knowledge'],
-    ['adapt','/əˈdæpt/','v. 适应；改编','adapt to the new environment'],
-    ['adequate','/ˈædɪkwət/','adj. 足够的；适当的','adequate preparation'],
-    ['adjacent','/əˈdʒeɪsnt/','adj. 邻近的；毗连的','the building adjacent to the library'],
-    ['advocate','/ˈædvəkeɪt/','v. 提倡；拥护 n. 拥护者','advocate free speech'],
-    ['affection','/əˈfekʃn/','n. 喜爱；感情','a deep affection for her'],
-    ['agenda','/əˈdʒendə/','n. 议事日程；议程','on the agenda'],
-    ['allocate','/ˈæləkeɪt/','v. 分配；拨给','allocate funds to the project'],
-    ['ambitious','/æmˈbɪʃəs/','adj. 有雄心的；野心勃勃的','an ambitious plan'],
-  ];
-  const wordBooks = [{id:uid(),name:'考研核心词汇',createdAt:t,words:words1.map((w,i)=>({id:uid(),word:w[0],phonetic:w[1],meaning:w[2],example:w[3],unit:i<12?1:2,mastered:0}))}];
-  const wordLogs = [];
-  for(let i=84;i>=1;i--){
-    const r=(i*13)%10;
-    if(r<2) continue; // 随机漏卡
-    const target=100, doneW=[60,80,100,100,90,100,70,100][i%8];
-    wordLogs.push({id:uid(),date:addDays(t,-i),book:'考研核心词汇',target,done:doneW,minutes:20+(i*7)%25,checked:doneW>=60});
-  }
-  const progress = [
-    {id:uid(),subject:'数学',sub:'高数',name:'极限与连续',status:'已掌握',pct:100,plan:addDays(t,-20),note:''},
-    {id:uid(),subject:'数学',sub:'高数',name:'一元函数微分学',status:'进行中',pct:60,plan:addDays(t,10),note:''},
-    {id:uid(),subject:'数学',sub:'线代',name:'矩阵及其运算',status:'进行中',pct:30,plan:addDays(t,-3),note:'特征值部分卡壳'},
-    {id:uid(),subject:'数学',sub:'概率论',name:'随机事件与概率',status:'未开始',pct:0,plan:addDays(t,30),note:''},
-    {id:uid(),subject:'英语',sub:'词汇',name:'核心词汇 5500',status:'进行中',pct:45,plan:addDays(t,40),note:''},
-    {id:uid(),subject:'英语',sub:'阅读',name:'真题阅读 2010-2015',status:'进行中',pct:30,plan:addDays(t,25),note:''},
-    {id:uid(),subject:'英语',sub:'写作',name:'大作文模板',status:'未开始',pct:0,plan:addDays(t,60),note:''},
-    {id:uid(),subject:'英语',sub:'翻译',name:'长难句拆解',status:'未开始',pct:0,plan:addDays(t,55),note:''},
-    {id:uid(),subject:'政治',sub:'马原',name:'唯物论与辩证法',status:'进行中',pct:20,plan:addDays(t,45),note:''},
-    {id:uid(),subject:'政治',sub:'毛中特',name:'新思想概论',status:'未开始',pct:0,plan:addDays(t,70),note:''},
-    {id:uid(),subject:'政治',sub:'史纲',name:'近代史时间线',status:'未开始',pct:0,plan:addDays(t,80),note:''},
-    {id:uid(),subject:'政治',sub:'思修法基',name:'思想道德修养',status:'未开始',pct:0,plan:addDays(t,90),note:''},
-    {id:uid(),subject:'政治',sub:'时政',name:'全年时政汇总',status:'未开始',pct:0,plan:addDays(t,100),note:''},
-  ];
-  const notes = [
-    {id:uid(),date:addDays(t,-1),type:'日复盘',done:'高数习题 20 道、单词 100 个',problem:'线代矩阵秩的概念理解不透',improve:'明天重看教材 3.2 节 + 错题整理',tomorrow:'线代错题本、英语阅读 2 篇',mood:'🙂',createdAt:addDays(t,-1)+'T21:30:00'},
-  ];
-  const ddls = [
-    {id:uid(),name:'考研初试',type:'考试',due:'2027-12-25',done:false,note:'全国硕士研究生招生考试'},
-    {id:uid(),name:'四六级考试',type:'考试',due:'2026-12-19',done:false,note:''},
-    {id:uid(),name:'英语演讲比赛报名截止',type:'报名',due:addDays(t,2),done:false,note:'学院初赛'},
-    {id:uid(),name:'期末周开始',type:'考试',due:'2027-01-05',done:false,note:''},
-  ];
-  const mistakes = [
-    {id:uid(),subject:'数学',title:'极限定义理解偏差',question:'求 lim(x→0) (sin x - x) / x³ 的值。',answer:'用泰勒展开：sin x = x - x³/6 + o(x³)，原式 = -1/6。',images:[],tags:'高数,极限,泰勒展开',status:'复习中',reviewCount:1,lastReview:addDays(t,-2),nextReview:t,note:'之前直接用 sin x ~ x 等价替换，结果为 0，错了——减法式子不能随意等价。',aiAnalysis:'',createdAt:addDays(t,-5)+'T20:00:00'},
-    {id:uid(),subject:'英语',title:'长难句主干找错',question:'The study, published in the journal Nature, suggests that birds living in urban environments have adapted their songs to compete with traffic noise.\n问：主句谓语动词是什么？',answer:'suggests。published... 是过去分词作后置定语，living... 是现在分词作定语修饰 birds，主干为 The study suggests that...。',images:[],tags:'阅读,长难句',status:'未掌握',reviewCount:0,lastReview:'',nextReview:t,note:'把 published 当成谓语了。',aiAnalysis:'',createdAt:addDays(t,-1)+'T21:10:00'},
-  ];
+  // 新设备先初始化空集合，再合并云端；不生成会被同步到服务器的示例记录。
   return {
-    todos, courses, wordBooks, wordLogs, progress, notes, ddls, mistakes,
-    chatSessions: [],
-    meta: { wordTarget:100, examDate:'2027-12-25', studyMinutes:{'数学':320,'英语':260,'政治':90,'单词':180,'其他':60}, updatedAt:new Date().toISOString() }
+    todos:[], courses:[], wordBooks:[], wordLogs:[], progress:[], notes:[],
+    ddls:[], mistakes:[], chatSessions:[],
+    meta:{wordTarget:100, examDate:EXAM_DATE_DEFAULT,
+      studyMinutes:{'数学':0,'英语':0,'政治':0,'测试开发':0,'单词':0,'其他':0},
+      updatedAt:new Date().toISOString()}
   };
 }
 
@@ -802,7 +728,7 @@ const MODULES = [
   {id:'todos',   name:'今日待办', icon:'<i class="fa-solid fa-list-check"></i>'},
   {id:'courses', name:'我的课表', icon:'<i class="fa-solid fa-calendar-week"></i>'},
   {id:'words',   name:'单词打卡', icon:'<i class="fa-solid fa-book-open"></i>'},
-  {id:'progress',name:'考研进度', icon:'<i class="fa-solid fa-chart-line"></i>'},
+  {id:'progress',name:'学习进度', icon:'<i class="fa-solid fa-chart-line"></i>'},
   {id:'mistakes',name:'错题复习', icon:'<i class="fa-solid fa-circle-xmark"></i>'},
   {id:'notes',   name:'复盘笔记', icon:'<i class="fa-solid fa-pen-to-square"></i>'},
   {id:'dash',    name:'数据总览', icon:'<i class="fa-solid fa-chart-pie"></i>'},
@@ -914,7 +840,8 @@ function homeCard(icon,name,inner,goId){
 function renderHome(){
   const t=todayStr();
   /* 复盘区 */
-  const notes=[...Store.coll('notes')].sort((a,b)=>b.date.localeCompare(a.date));
+  const plans=Store.coll('notes').filter(n=>n.type==='学习计划');
+  const notes=Store.coll('notes').filter(n=>n.type!=='学习计划').sort((a,b)=>b.date.localeCompare(a.date));
   const latest=notes[0];
   const hasToday=notes.some(n=>n.date===t);
   /* 各模块缩略数据 */
@@ -925,7 +852,7 @@ function renderHome(){
   const tcs=todayCourses();
   const log=Store.coll('wordLogs').find(x=>x.date===t);
   const target=Store.data.meta.wordTarget, doneW=log?log.done:0;
-  const overall=Math.round((subjAvg('数学')+subjAvg('英语')+subjAvg('政治'))/3);
+  const overall=Math.round(overallProgress());
   const behindN=Store.coll('progress').filter(x=>x.status!=='已掌握'&&x.plan<t).length;
   const nextDdl=Store.coll('ddls').filter(x=>!x.done).sort((a,b)=>dayDiff(a.due,t)-dayDiff(b.due,t))[0];
   const [wm,ws]=weekRange();
@@ -947,13 +874,14 @@ function renderHome(){
       <h3><i class="fa-solid fa-lightbulb"></i> 推荐做法 <span class="muted" style="font-weight:400;font-size:12px">根据你的数据实时生成</span></h3>
       ${homeAdvice().map(a=>`<div class="advice-item" onclick="go('${a.go}')"><span>${a.icon}</span><span class="adv-text grow">${esc(a.text)}</span><span style="color:var(--muted)">›</span></div>`).join('')}
     </div>
+    ${plans.length?`<div class="card"><h3><i class="fa-solid fa-calendar-check"></i> 学习计划</h3>${plans.map(n=>`<div style="margin-bottom:10px"><b>${esc(n.done.split('\n')[0])}</b><p class="muted" style="white-space:pre-wrap">${esc(n.done.split('\n').slice(1).join('\n'))}</p><button class="btn sm soft" onclick="Notes.edit('${n.id}')">查看完整计划</button></div>`).join('')}</div>`:''}
   </div>
   <div class="section-title"><i class="fa-solid fa-house"></i> 主页 <span class="muted" style="font-weight:400;font-size:12px">点击卡片进入对应模块</span></div>
   <div class="home-cards">
     ${homeCard('<i class="fa-solid fa-list-check"></i>','今日待办',`<div class="row">${ringSVG(todoPct,64,8,'var(--vivid)')}<div><div class="hc-big">${todayDone.length}/${todayAll.length}</div><div class="hc-sub">今日完成${overdueN?` · <span style="color:var(--danger)">${overdueN} 条逾期</span>`:''}</div></div></div>`,'todos')}
     ${homeCard('<i class="fa-solid fa-calendar-week"></i>','我的课表',tcs.length?`<div class="hc-big">${tcs.length} 节课</div><div class="hc-sub">最近：${esc(tcs[0].name)}<br>${SECTION_TIMES[tcs[0].secStart-1].split('-')[0]} @ ${esc(tcs[0].place)}</div>`:`<div class="hc-big">无课</div><div class="hc-sub">今天没有课，自由安排</div>`,'courses')}
     ${homeCard('<i class="fa-solid fa-book-open"></i>','单词打卡',`<div class="row">${ringSVG(doneW/target*100,64,8,'var(--vivid)')}<div><div class="hc-big">${doneW}/${target}</div><div class="hc-sub"><i class="fa-solid fa-fire"></i> 连续 ${wordStreak()} 天 · 本周 ${weekWords} 词</div></div></div>`,'words')}
-    ${homeCard('<i class="fa-solid fa-chart-line"></i>','考研进度',`<div class="hc-big">${overall}%</div><div class="progress-track"><div class="progress-fill" style="width:${overall}%"></div></div><div class="hc-sub">数 ${Math.round(subjAvg('数学'))}% · 英 ${Math.round(subjAvg('英语'))}% · 政 ${Math.round(subjAvg('政治'))}%${behindN?` · <span style="color:var(--danger)">${behindN} 项落后</span>`:''}</div>`,'progress')}
+    ${homeCard('<i class="fa-solid fa-chart-line"></i>','学习进度',`<div class="hc-big">${overall}%</div><div class="progress-track"><div class="progress-fill" style="width:${overall}%"></div></div><div class="hc-sub">${progressSubjects().map(s=>s+' '+Math.round(subjAvg(s))+'%').join(' · ')||'尚未添加学习条目'}${behindN?` · <span style="color:var(--danger)">${behindN} 项落后</span>`:''}</div>`,'progress')}
     ${homeCard('<i class="fa-solid fa-circle-xmark"></i>','错题复习',(()=>{const ms=Store.coll('mistakes'),due=ms.filter(m=>m.status!=='已掌握'&&(m.nextReview||'')<=t),mast=ms.length?Math.round(ms.filter(m=>m.status==='已掌握').length/ms.length*100):0;
       return `<div class="hc-big" style="color:${due.length?'var(--danger)':'var(--ink)'}">${due.length} 道</div><div class="hc-sub">今日待复习 · 共 ${ms.length} 道 · 掌握率 ${mast}%</div>`;})(),'mistakes')}
     ${homeCard('<i class="fa-solid fa-pen-to-square"></i>','复盘笔记',`<div class="hc-big">${notes.length} 条</div><div class="hc-sub">${latest?'最近：'+latest.date+' '+latest.type+' '+(latest.mood||''):'还没开始写'}</div>`,'notes')}
@@ -974,7 +902,7 @@ const Todo = {
   done(id){ const it=Store.coll('todos').find(x=>x.id===id); if(!it)return;
     if(it.done){ API.data.update('todos',id,{done:false,doneAt:null}); }
     else{ API.data.update('todos',id,{done:true,doneAt:new Date().toISOString()});
-      const map={'学习':'数学','生活':'其他','社团':'其他','其他':'其他'}; Store.data.meta.studyMinutes[map[it.cat]||'其他']+=25; Store.save(); }
+      const map={'学习':'数学','测试开发':'测试开发','生活':'其他','社团':'其他','其他':'其他'}; const category=map[it.cat]||'其他'; Store.data.meta.studyMinutes[category]=(Store.data.meta.studyMinutes[category]||0)+25; Store.save(); }
     renderAll(); },
   del(id){ if(confirm('删除这条待办？')){ API.data.remove('todos',id); renderAll(); } },
   addQuick(){
@@ -1008,7 +936,7 @@ function renderTodos(){
         <div class="quick-add">
           <input class="field" id="qa-name" placeholder="快速添加任务，回车确认" onkeydown="if(event.key==='Enter')Todo.addQuick()">
           <select class="field" id="qa-pri"><option>P0</option><option selected>P1</option><option>P2</option></select>
-          <select class="field" id="qa-cat"><option>学习</option><option>生活</option><option>社团</option><option>其他</option></select>
+          <select class="field" id="qa-cat"><option>测试开发</option><option>学习</option><option>生活</option><option>社团</option><option>其他</option></select>
           <input class="field" type="date" id="qa-due" value="${t}" style="width:150px">
           <button class="btn" onclick="Todo.addQuick()">＋ 添加</button>
         </div>
@@ -1274,8 +1202,8 @@ function renderWords(){
 /* =========================================================
  * 模块 4｜考研学习进度
  * ========================================================= */
-let progSubj='数学';
-const SUBS={'数学':['高数','线代','概率论'],'英语':['词汇','阅读','写作','翻译'],'政治':['马原','毛中特','史纲','思修法基','时政']};
+let progSubj='';
+const SUBS={'测试开发':['第 1 周 · Python / pytest','第 2 周 · CAN / DBC','第 3 周 · HIL / 嵌入式','第 4 周 · 项目 / 实习'],'数学':['高数','线代','概率论'],'英语':['词汇','阅读','写作','翻译'],'政治':['马原','毛中特','史纲','思修法基','时政']};
 const Prog = {
   subj(s){ progSubj=s; renderAll(); },
   bump(id,d){ const it=Store.coll('progress').find(x=>x.id===id); const pct=Math.min(100,Math.max(0,it.pct+d));
@@ -1298,16 +1226,20 @@ const Prog = {
   del(id){ if(confirm('删除该条目？')){API.data.remove('progress',id);closeModal();renderAll();} }
 };
 function subjAvg(s){ const l=Store.coll('progress').filter(x=>x.subject===s); return l.length? l.reduce((a,x)=>a+x.pct,0)/l.length:0; }
+function progressSubjects(){ return Object.keys(SUBS).filter(s=>Store.coll('progress').some(x=>x.subject===s)); }
+function overallProgress(){ const subjects=progressSubjects(); return subjects.length?subjects.reduce((n,s)=>n+subjAvg(s),0)/subjects.length:0; }
 function renderProgress(){
   const t=todayStr();
+  const subjects=progressSubjects();
+  if(!progSubj) progSubj=subjects[0]||'测试开发';
   const list=Store.coll('progress').filter(x=>x.subject===progSubj);
-  const overall=(subjAvg('数学')+subjAvg('英语')+subjAvg('政治'))/3;
+  const overall=overallProgress();
   const behind=Store.coll('progress').filter(x=>x.status!=='已掌握'&&x.plan<t);
   const groups={}; list.forEach(x=>{(groups[x.sub]=groups[x.sub]||[]).push(x);});
-  $('#view').innerHTML = `<div class="section-title"><i class="fa-solid fa-chart-line"></i> 考研学习进度 <span class="grow"></span><button class="btn sm" onclick="Prog.edit()">＋ 新增条目</button></div>
+  $('#view').innerHTML = `<div class="section-title"><i class="fa-solid fa-chart-line"></i> 学习进度 <span class="grow"></span><button class="btn sm" onclick="Prog.edit()">＋ 新增条目</button></div>
   <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(300px,1fr));margin-bottom:14px">
     <div class="card stat-ring-wrap">${ringSVG(overall,110,11,'var(--primary)','总体进度')}
-      <div>${['数学','英语','政治'].map(s=>`<div style="margin-bottom:8px"><div class="row" style="justify-content:space-between;width:190px"><span>${s}</span><b>${Math.round(subjAvg(s))}%</b></div><div class="progress-track" style="width:190px"><div class="progress-fill" style="width:${subjAvg(s)}%"></div></div></div>`).join('')}</div></div>
+      <div>${progressSubjects().map(s=>`<div style="margin-bottom:8px"><div class="row" style="justify-content:space-between;width:190px"><span>${s}</span><b>${Math.round(subjAvg(s))}%</b></div><div class="progress-track" style="width:190px"><div class="progress-fill" style="width:${subjAvg(s)}%"></div></div></div>`).join('')}</div></div>
     <div class="card"><h3><i class="fa-solid fa-triangle-exclamation"></i> 落后预警</h3>${behind.length? behind.map(x=>`<div class="row" style="padding:7px 0;border-bottom:1px solid var(--line)"><span class="tag red">超期 ${dayDiff(t,x.plan)} 天</span><b>${esc(x.name)}</b><span class="muted">${x.subject} · ${x.pct}%</span></div>`).join('') : '<div class="muted">计划日期已过但未完成的条目会在这里标红，目前没有 <i class="fa-solid fa-circle-check"></i></div>'}</div>
   </div>
   <div class="subj-tabs">${Object.keys(SUBS).map(s=>`<button class="${progSubj===s?'active':''}" onclick="Prog.subj('${s}')">${s}</button>`).join('')}</div>
@@ -1509,11 +1441,11 @@ const Notes = {
   filter(t){ noteType=t; renderAll(); },
   edit(id){
     const n=id?Store.coll('notes').find(x=>x.id===id):{date:todayStr(),type:'日复盘',done:'',problem:'',improve:'',tomorrow:'',mood:'🙂'};
-    openModal(`<h3>${id?'编辑':'写'}复盘 <button class="btn sm soft" style="float:right" onclick="Notes.aiDraft('${id||''}')"><i class="fa-solid fa-wand-magic-sparkles"></i> 请 AI 生成草稿</button></h3>
+    openModal(`<h3>${n.type==='学习计划'?'学习计划':(id?'编辑':'写')+'复盘'} <button class="btn sm soft" style="float:right;${n.type==='学习计划'?'display:none':''}" onclick="Notes.aiDraft('${id||''}')"><i class="fa-solid fa-wand-magic-sparkles"></i> 请 AI 生成草稿</button></h3>
       <div class="row"><div class="frow grow"><label>日期</label><input class="field" type="date" id="nf-date" value="${n.date}"></div>
-      <div class="frow grow"><label>类型</label><select class="field" id="nf-type">${['日复盘','周复盘'].map(x=>`<option ${n.type===x?'selected':''}>${x}</option>`).join('')}</select></div>
+      <div class="frow grow"><label>类型</label><select class="field" id="nf-type">${['日复盘','周复盘','学习计划'].map(x=>`<option ${n.type===x?'selected':''}>${x}</option>`).join('')}</select></div>
       <div class="frow grow"><label>心情</label><select class="field" id="nf-mood">${['😄','🙂','😐','😟','😤'].map(x=>`<option ${n.mood===x?'selected':''}>${x}</option>`).join('')}</select></div></div>
-      ${[['今日完成','done'],['问题与不足','problem'],['改进措施','improve'],['明日计划','tomorrow']].map(f=>`
+      ${(n.type==='学习计划'?[['计划目标','done'],['学习安排','problem'],['资料与实践','improve'],['验收与投递','tomorrow']]:[['今日完成','done'],['问题与不足','problem'],['改进措施','improve'],['明日计划','tomorrow']]).map(f=>`
       <div class="frow"><label>${f[0]} <span class="muted" id="wc-${f[1]}"></span></label><textarea class="field" id="nf-${f[1]}" rows="3" oninput="document.querySelector('#wc-${f[1]}').textContent=this.value.length+' 字'">${esc(n[f[1]])}</textarea></div>`).join('')}
       <div class="fbtns">${id?`<button class="btn danger-ghost" onclick="Notes.del('${id}')">删除</button>`:''}<button class="btn ghost" onclick="closeModal()">取消</button><button class="btn" onclick="Notes.save('${id||''}')">保存</button></div>`);
   },
@@ -1539,11 +1471,11 @@ function renderNotes(){
   let list=[...Store.coll('notes')].sort((a,b)=>b.date.localeCompare(a.date));
   if(noteType!=='全部') list=list.filter(x=>x.type===noteType);
   $('#view').innerHTML = `<div class="section-title"><i class="fa-solid fa-pen-to-square"></i> 复盘笔记 <span class="grow"></span>
-    <div class="filter-tabs">${['全部','日复盘','周复盘'].map(x=>`<button class="${noteType===x?'active':''}" onclick="Notes.filter('${x}')">${x}</button>`).join('')}</div>
+    <div class="filter-tabs">${['全部','日复盘','周复盘','学习计划'].map(x=>`<button class="${noteType===x?'active':''}" onclick="Notes.filter('${x}')">${x}</button>`).join('')}</div>
     <button class="btn sm" onclick="Notes.edit()">＋ 写复盘</button></div>
   <div class="card">${list.map(n=>`<div class="note-item" onclick="Notes.edit('${n.id}')">
       <div class="row"><span class="n-title" style="font-weight:700">${n.date}</span><span class="tag cat">${n.type}</span><span>${n.mood||''}</span><span class="muted" style="margin-left:auto">${(n.done+n.problem+n.improve+n.tomorrow).length} 字</span></div>
-      <div class="muted" style="margin-top:6px;white-space:pre-wrap"><i class="fa-solid fa-check"></i> ${esc(n.done).slice(0,80)}${n.done.length>80?'…':''}</div>
+      <div class="muted" style="margin-top:6px;white-space:pre-wrap"><i class="fa-solid ${n.type==='学习计划'?'fa-calendar-check':'fa-check'}"></i> ${esc(n.done).slice(0,80)}${n.done.length>80?'…':''}</div>
     </div>`).join('') || '<div class="muted" style="padding:20px;text-align:center">还没有复盘，点右上「写复盘」开始</div>'}
   </div>`;
 }
@@ -1560,7 +1492,7 @@ const Dash = {
     const overdue=todos.filter(x=>!x.done&&x.due<t);
     const behind=Store.coll('progress').filter(x=>x.status!=='已掌握'&&x.plan<t);
     const streak=wordStreak();
-    const summary=`本周单词 ${(function(){const[a,b]=weekRange();return Store.coll('wordLogs').filter(x=>x.date>=a&&x.date<=b).reduce((s,x)=>s+x.done,0);})()} 词，连续打卡 ${streak} 天；总体进度 ${Math.round((subjAvg('数学')+subjAvg('英语')+subjAvg('政治'))/3)}%。`;
+    const summary=`本周单词 ${(function(){const[a,b]=weekRange();return Store.coll('wordLogs').filter(x=>x.date>=a&&x.date<=b).reduce((s,x)=>s+x.done,0);})()} 词，连续打卡 ${streak} 天；总体进度 ${Math.round(overallProgress())}%。`;
     const issues=[...overdue.map(x=>'逾期待办：'+x.name), ...behind.map(x=>'进度落后：'+x.name+'（'+x.subject+' '+x.pct+'%）')];
     const sugg=[overdue.length?'优先清理逾期待办，把大任务拆成 25 分钟小块':'保持当前节奏', behind.length?'为「'+behind[0].name+'」安排今晚 1 小时专项':'按计划推进', streak<3?'单词连续打卡偏少，建议固定早晨时段':'单词节奏不错，继续保持'];
     openModal(`<h3><i class="fa-solid fa-wand-magic-sparkles"></i> AI 数据解读 ${API.ai.configured()?'':'<span class="tag orange">本地生成 · 未接 AI</span>'}</h3>
@@ -1593,21 +1525,21 @@ function renderDash(){
   const t=todayStr();
   const todos=Store.coll('todos').filter(x=>!x.name.startsWith('历史任务'));
   const todayAll=todos.filter(x=>x.due<=t), doneR=todayAll.length?Math.round(todayAll.filter(x=>x.done).length/todayAll.length*100):100;
-  const overall=Math.round((subjAvg('数学')+subjAvg('英语')+subjAvg('政治'))/3);
+  const overall=Math.round(overallProgress());
   const [wm,ws]=weekRange();
-  const weekMin=Store.coll('wordLogs').filter(x=>x.date>=wm&&x.date<=ws).reduce((s,x)=>s+(x.minutes||0),0)+Store.data.meta.studyMinutes['其他'];
+  const weekMin=Store.coll('wordLogs').filter(x=>x.date>=wm&&x.date<=ws).reduce((s,x)=>s+(x.minutes||0),0)+todos.filter(x=>x.done&&x.doneAt&&x.doneAt.slice(0,10)>=wm&&x.doneAt.slice(0,10)<=ws).length*25;
   const trend=[...Array(trendDays)].map((_,i)=>{ const d=addDays(t,-(trendDays-1-i)); return [d, Store.coll('todos').filter(x=>x.done&&x.doneAt&&x.doneAt.slice(0,10)===d).length]; });
   $('#view').innerHTML = `<div class="section-title"><i class="fa-solid fa-chart-pie"></i> 数据总览 <span class="grow"></span><button class="btn sm soft" onclick="Dash.aiAnalyze()"><i class="fa-solid fa-wand-magic-sparkles"></i> 让 AI 解读</button></div>
   <div class="stat-cards">
     <div class="stat-card"><span class="muted">今日任务完成率</span><div class="sv" style="color:var(--primary)">${doneR}%</div><span class="muted">${todayAll.filter(x=>x.done).length}/${todayAll.length} 项</span></div>
     <div class="stat-card"><span class="muted">连续打卡天数</span><div class="sv" style="color:var(--danger)">${wordStreak()} 天</div><span class="muted">单词打卡</span></div>
     <div class="stat-card"><span class="muted">本周学习时长</span><div class="sv" style="color:var(--accent)">${Math.round(weekMin/60*10)/10} h</div><span class="muted">含单词 + 任务折算</span></div>
-    <div class="stat-card"><span class="muted">考研总进度</span><div class="sv">${overall}%</span><span class="muted">数 / 英 / 政平均</span></div>
+    <div class="stat-card"><span class="muted">学习总进度</span><div class="sv">${overall}%</span><span class="muted">按有学习条目的分类平均</span></div>
   </div>
   <div class="chart-grid">
     <div class="card"><h3>任务完成趋势 <span class="grow"></span><div class="filter-tabs"><button class="${trendDays===7?'active':''}" onclick="Dash.days(7)">近 7 天</button><button class="${trendDays===30?'active':''}" onclick="Dash.days(30)">近 30 天</button></div></h3>${lineChartSVG(trend)}</div>
     <div class="card"><h3>单词打卡热力图（近 12 周）</h3>${heatSVG(84)}</div>
-    <div class="card"><h3>三科进度对比</h3>${['数学','英语','政治'].map(s=>`<div style="margin:14px 0"><div class="row" style="justify-content:space-between"><span>${s}</span><b>${Math.round(subjAvg(s))}%</b></div><div class="progress-track" style="height:14px"><div class="progress-fill" style="width:${subjAvg(s)}%"></div></div></div>`).join('')}</div>
+    <div class="card"><h3>学习进度对比</h3>${progressSubjects().map(s=>`<div style="margin:14px 0"><div class="row" style="justify-content:space-between"><span>${s}</span><b>${Math.round(subjAvg(s))}%</b></div><div class="progress-track" style="height:14px"><div class="progress-fill" style="width:${subjAvg(s)}%"></div></div></div>`).join('')}</div>
     <div class="card"><h3>时间分配</h3>${donutSVG(Store.data.meta.studyMinutes)}</div>
   </div>`;
 }
