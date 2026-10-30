@@ -6,6 +6,8 @@
 # 数据库与运行产物
 *.db
 *.sqlite
+*.db.*.bak
+*.sqlite.*.bak
 venv/
 __pycache__/
 *.pyc

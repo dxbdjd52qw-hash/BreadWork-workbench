@@ -56,6 +56,25 @@ sudo systemctl enable --now ytwb-api
 - 后端：FastAPI + SQLite（records 通用表 upsert 合并），JWT/共享 Key 双鉴权
 - AI：DeepSeek OpenAI 兼容接口，后端转发 SSE 逐字流回
 
+## 汽车测试开发学习计划
+
+“学习进度”支持测试开发、数学、英语、政治；首页和数据总览只对有条目的分类计算平均进度。完整的[四周学习计划](docs/汽车测试开发-四周学习计划.md)安排在 2026-10-31 至 2026-11-27，含 28 条每日待办、4 个周进度、4 个验收节点与一份学习计划笔记。新设备初始化为空，再同步云端，不再生成演示记录或虚构学习时长。
+
+在现有服务器上先预览导入与示例清理：
+
+```bash
+python3 scripts/import_testing_plan.py --db /opt/ytwb-backend/ytwb.db
+```
+
+核对输出后加 `--apply` 执行。脚本在数据库旁建立权限为 `0600` 的 SQLite 完整备份，再事务性地软删除与历史示例匹配的记录、导入计划。真实或已修改的记录、聊天记录保留。固定导入 ID 可避免重复创建，也不会覆盖已经更新的学习进度。数据库路径必须指向现存文件；不会创建空库。前端仍需将 `frontend/index.html` 与 `backend/static/index.html` 一起部署到现有静态目录。
+
+无需安装额外测试依赖：
+
+```bash
+node --test tests/frontend.test.cjs
+python3 -m unittest discover -s tests -p 'test_*.py'
+```
+
 ## 安全红线
 
 - `DEEPSEEK_API_KEY`、`API_KEY`、`JWT_SECRET`、`ADMIN_PASSWORD` 只存在于服务器 `.env`
